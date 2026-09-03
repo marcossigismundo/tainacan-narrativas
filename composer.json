@@ -1,0 +1,38 @@
+{
+	"name": "marcossigismundo/tainacan-narrativas",
+	"description": "Transforma itens Tainacan em experiências narrativas em áudio (leitura documental, narrativa assistida por IA e síntese de voz).",
+	"type": "wordpress-plugin",
+	"license": "GPL-2.0-or-later",
+	"homepage": "https://github.com/marcossigismundo/tainacan-narrativas",
+	"require": {
+		"php": ">=8.0",
+		"ext-json": "*",
+		"ext-mbstring": "*",
+		"smalot/pdfparser": "^2.12"
+	},
+	"require-dev": {
+		"squizlabs/php_codesniffer": "^3.13",
+		"wp-coding-standards/wpcs": "^3.3",
+		"phpcompatibility/phpcompatibility-wp": "^2.1",
+		"phpcsstandards/phpcsextra": "^1.2",
+		"dealerdirect/phpcodesniffer-composer-installer": "^1.2",
+		"phpunit/phpunit": "^9.6"
+	},
+	"autoload": {
+		"psr-4": {
+			"TainacanNarrativas\\": "includes/"
+		}
+	},
+	"scripts": {
+		"lint": "phpcs --standard=phpcs.xml.dist",
+		"lint:fix": "phpcbf --standard=phpcs.xml.dist",
+		"test": "phpunit -c tests/phpunit.xml.dist"
+	},
+	"config": {
+		"optimize-autoloader": true,
+		"platform": { "php": "8.0.30" },
+		"allow-plugins": {
+			"dealerdirect/phpcodesniffer-composer-installer": true
+		}
+	}
+}

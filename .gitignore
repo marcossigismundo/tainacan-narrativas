@@ -1,0 +1,26 @@
+node_modules/
+.phpunit.result.cache
+*.log
+.DS_Store
+Thumbs.db
+# Dev-only composer packages are never committed; vendor/ holds only runtime deps.
+vendor/bin/
+vendor/squizlabs/
+vendor/wp-coding-standards/
+vendor/phpcompatibility/
+vendor/phpcsstandards/
+vendor/dealerdirect/
+vendor/phpunit/
+vendor/sebastian/
+vendor/myclabs/
+vendor/nikic/
+vendor/phar-io/
+vendor/theseer/
+vendor/doctrine/
+vendor/phpdocumentor/
+vendor/phpspec/
+vendor/webmozart/
+vendor/symfony/deprecation-contracts/
+vendor/symfony/polyfill-ctype/
+vendor/symfony/polyfill-php80/
+vendor/symfony/polyfill-php81/

@@ -1,0 +1,1979 @@
+# Copyright (C) 2026 Marcos Sigismundo
+# This file is distributed under the GPL-2.0-or-later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Tainacan Narrativas 1.0.0\n"
+"Report-Msgid-Bugs-To: https://github.com/marcossigismundo/tainacan-narrativas/issues\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: Marcos Sigismundo\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-09-03T02:44:32+02:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: tainacan-narrativas\n"
+
+#. Plugin Name of the plugin
+#: tainacan-narrativas.php
+#: includes/Admin/views/page.php:46
+msgid "Tainacan Narrativas"
+msgstr ""
+
+#. Plugin URI of the plugin
+#: tainacan-narrativas.php
+msgid "https://github.com/marcossigismundo/tainacan-narrativas"
+msgstr ""
+
+#. Description of the plugin
+#: tainacan-narrativas.php
+msgid "Transforma itens Tainacan em experiências narrativas em áudio: leitura documental dos metadados e documentos, narrativa opcional assistida por IA e síntese de voz, com player acessível na página pública do item."
+msgstr ""
+
+#. Author of the plugin
+#: tainacan-narrativas.php
+msgid "Marcos Sigismundo"
+msgstr ""
+
+#. Author URI of the plugin
+#: tainacan-narrativas.php
+msgid "https://github.com/marcossigismundo"
+msgstr ""
+
+#: includes/Admin/AdminPage.php:64
+msgid "Painel"
+msgstr ""
+
+#: includes/Admin/AdminPage.php:65
+#: includes/Admin/AdminPage.php:88
+#: includes/Admin/AdminPage.php:89
+#: includes/Core/Plugin.php:206
+msgid "Narrativas"
+msgstr ""
+
+#: includes/Admin/AdminPage.php:66
+#: includes/Admin/views/tab-collections.php:27
+msgid "Coleções"
+msgstr ""
+
+#: includes/Admin/AdminPage.php:67
+#: includes/Admin/views/tab-collections.php:146
+#: includes/Admin/views/tab-narratives.php:67
+msgid "IA"
+msgstr ""
+
+#: includes/Admin/AdminPage.php:68
+#: includes/Admin/views/tab-voice.php:47
+#: includes/Admin/views/wizard.php:69
+msgid "Voz"
+msgstr ""
+
+#: includes/Admin/AdminPage.php:69
+msgid "Processamento"
+msgstr ""
+
+#: includes/Admin/AdminPage.php:70
+msgid "Configurações"
+msgstr ""
+
+#: includes/Admin/AdminPage.php:71
+#: includes/Admin/views/tab-diagnostics.php:18
+msgid "Diagnóstico"
+msgstr ""
+
+#: includes/Admin/AdminPage.php:131
+msgid "Processando…"
+msgstr ""
+
+#: includes/Admin/AdminPage.php:132
+msgid "Enfileirado. Executando a fila…"
+msgstr ""
+
+#: includes/Admin/AdminPage.php:133
+msgid "Concluído."
+msgstr ""
+
+#: includes/Admin/AdminPage.php:134
+#: includes/Admin/views/tab-processing.php:34
+#: includes/Database/NarrativeRepository.php:68
+msgid "Erro"
+msgstr ""
+
+#: includes/Admin/AdminPage.php:135
+msgid "Excluir a narrativa e o áudio deste item? Esta ação não pode ser desfeita."
+msgstr ""
+
+#: includes/Admin/AdminPage.php:136
+msgid "Excluir o áudio gerado? O roteiro será mantido."
+msgstr ""
+
+#: includes/Admin/AdminPage.php:137
+msgid "Roteiro salvo. Aprove para gerar o áudio."
+msgstr ""
+
+#: includes/Admin/AdminPage.php:138
+msgid "Fila vazia."
+msgstr ""
+
+#. translators: 1: done, 2: retry, 3: failed.
+#: includes/Admin/AdminPage.php:139
+#, php-format
+msgid "Fila: %1$d concluído(s), %2$d reagendado(s), %3$d falha(s)."
+msgstr ""
+
+#. translators: 1: done, 2: retry, 3: failed.
+#: includes/Admin/AdminPage.php:140
+msgid "Testando…"
+msgstr ""
+
+#: includes/Admin/AdminPage.php:141
+msgid "Copiado."
+msgstr ""
+
+#: includes/Admin/AdminPage.php:142
+msgid "Fontes que entrarão na narrativa"
+msgstr ""
+
+#: includes/Admin/AdminPage.php:173
+msgid "Você não tem permissão para acessar esta página."
+msgstr ""
+
+#: includes/Admin/AdminPage.php:177
+msgid "Tainacan não está ativo."
+msgstr ""
+
+#: includes/Admin/Diagnostics.php:55
+msgid "WordPress"
+msgstr ""
+
+#: includes/Admin/Diagnostics.php:56
+msgid "PHP"
+msgstr ""
+
+#: includes/Admin/Diagnostics.php:63
+msgid "Extensões PHP"
+msgstr ""
+
+#: includes/Admin/Diagnostics.php:66
+msgid "Tainacan"
+msgstr ""
+
+#: includes/Admin/Diagnostics.php:66
+msgid "não encontrado"
+msgstr ""
+
+#: includes/Admin/Diagnostics.php:67
+msgid "HTTPS"
+msgstr ""
+
+#: includes/Admin/Diagnostics.php:67
+msgid "ativo"
+msgstr ""
+
+#: includes/Admin/Diagnostics.php:67
+msgid "inativo (o TTS do navegador e a Media Session funcionam melhor em HTTPS)"
+msgstr ""
+
+#: includes/Admin/Diagnostics.php:73
+msgid "WP-Cron"
+msgstr ""
+
+#. translators: %s: human time diff.
+#: includes/Admin/Diagnostics.php:77
+#, php-format
+msgid "próxima execução da fila em %s"
+msgstr ""
+
+#: includes/Admin/Diagnostics.php:78
+msgid "evento da fila não agendado (reative o plugin)"
+msgstr ""
+
+#: includes/Admin/Diagnostics.php:81
+msgid "REST API"
+msgstr ""
+
+#: includes/Admin/Diagnostics.php:85
+msgid "não"
+msgstr ""
+
+#: includes/Admin/Diagnostics.php:86
+msgid "Diretório de uploads gravável"
+msgstr ""
+
+#: includes/Admin/Diagnostics.php:86
+msgid "sim"
+msgstr ""
+
+#: includes/Admin/Diagnostics.php:87
+msgid "Tabelas do plugin"
+msgstr ""
+
+#: includes/Admin/Diagnostics.php:87
+msgid "criadas"
+msgstr ""
+
+#: includes/Admin/Diagnostics.php:87
+msgid "ausentes (reative o plugin)"
+msgstr ""
+
+#: includes/Admin/Diagnostics.php:88
+msgid "Extração de PDF (smalot/pdfparser)"
+msgstr ""
+
+#: includes/Admin/Diagnostics.php:88
+msgid "disponível"
+msgstr ""
+
+#: includes/Admin/Diagnostics.php:88
+msgid "biblioteca ausente em vendor/"
+msgstr ""
+
+#: includes/Admin/Diagnostics.php:90
+msgid "Indexação de PDF do Tainacan"
+msgstr ""
+
+#: includes/Admin/Diagnostics.php:90
+msgid "ativa (o texto indexado do documento é reutilizado)"
+msgstr ""
+
+#: includes/Admin/Diagnostics.php:90
+msgid "inativa (o plugin extrai o texto por conta própria)"
+msgstr ""
+
+#: includes/Admin/Diagnostics.php:95
+#: includes/Admin/Diagnostics.php:98
+msgid "IA selecionada"
+msgstr ""
+
+#: includes/Admin/Diagnostics.php:95
+msgid "nenhuma (roteiro documental por template)"
+msgstr ""
+
+#: includes/Admin/Diagnostics.php:98
+#: includes/Admin/views/tab-ai.php:26
+msgid "não configurada"
+msgstr ""
+
+#: includes/Admin/Diagnostics.php:98
+#: includes/Admin/Diagnostics.php:106
+msgid "provedor desconhecido"
+msgstr ""
+
+#: includes/Admin/Diagnostics.php:99
+msgid "Endpoint IA"
+msgstr ""
+
+#: includes/Admin/Diagnostics.php:101
+msgid "WordPress AI Client"
+msgstr ""
+
+#: includes/Admin/Diagnostics.php:101
+msgid "disponível (WP 7.0+)"
+msgstr ""
+
+#: includes/Admin/Diagnostics.php:101
+msgid "indisponível nesta versão do WordPress"
+msgstr ""
+
+#: includes/Admin/Diagnostics.php:106
+msgid "TTS selecionado"
+msgstr ""
+
+#: includes/Admin/Diagnostics.php:106
+msgid "não configurado (cai para a voz do navegador)"
+msgstr ""
+
+#: includes/Admin/Diagnostics.php:108
+msgid "Endpoint TTS"
+msgstr ""
+
+#: includes/Admin/Diagnostics.php:110
+msgid "Endpoints de rede privada"
+msgstr ""
+
+#: includes/Admin/Diagnostics.php:110
+msgid "permitidos (necessário para Ollama/Kokoro/Piper locais)"
+msgstr ""
+
+#: includes/Admin/Diagnostics.php:110
+msgid "bloqueados (padrão seguro)"
+msgstr ""
+
+#: includes/Admin/Diagnostics.php:114
+msgid "Fila"
+msgstr ""
+
+#: includes/Admin/Diagnostics.php:116
+msgid "Último job"
+msgstr ""
+
+#: includes/Admin/Diagnostics.php:116
+msgid "nenhum"
+msgstr ""
+
+#: includes/Admin/Diagnostics.php:118
+msgid "Limites PHP"
+msgstr ""
+
+#: includes/Admin/Diagnostics.php:170
+#: includes/Admin/views/tab-voice.php:60
+msgid "não configurado"
+msgstr ""
+
+#: includes/Admin/Diagnostics.php:174
+msgid "inválido"
+msgstr ""
+
+#: includes/Admin/Diagnostics.php:177
+msgid "rede privada"
+msgstr ""
+
+#: includes/Admin/SettingsHandler.php:70
+msgid "Coleção inválida."
+msgstr ""
+
+#: includes/Admin/SettingsHandler.php:175
+#: includes/REST/Controller.php:447
+msgid "Você não tem permissão para esta ação."
+msgstr ""
+
+#. translators: 1: field key, 2: validation message.
+#: includes/Admin/SettingsHandler.php:284
+#, php-format
+msgid "%1$s: %2$s"
+msgstr ""
+
+#: includes/Admin/views/page.php:37
+msgid "Configurações salvas."
+msgstr ""
+
+#: includes/Admin/views/page.php:38
+msgid "Algumas configurações não foram salvas:"
+msgstr ""
+
+#: includes/Admin/views/page.php:39
+msgid "Configuração inicial concluída. As narrativas estão habilitadas para as coleções escolhidas."
+msgstr ""
+
+#: includes/Admin/views/page.php:40
+msgid "Configuração inicial pulada. O plugin permanece desativado até você habilitar as coleções em Coleções e marcar \"Ativar narrativas\" em Configurações."
+msgstr ""
+
+#: includes/Admin/views/page.php:49
+msgid "Itens Tainacan como experiências narrativas em áudio: leitura documental, narrativa assistida por IA e síntese de voz."
+msgstr ""
+
+#: includes/Admin/views/page.php:67
+msgid "O plugin está em modo sem configuração: nenhuma narrativa é gerada e nenhum serviço externo é chamado até você ativar as narrativas."
+msgstr ""
+
+#: includes/Admin/views/page.php:68
+msgid "Abrir a configuração inicial"
+msgstr ""
+
+#: includes/Admin/views/page.php:78
+#: includes/Admin/views/tab-dashboard.php:23
+#: includes/Database/NarrativeRepository.php:64
+msgid "Aguardando revisão"
+msgstr ""
+
+#: includes/Admin/views/page.php:99
+msgid "Resumo"
+msgstr ""
+
+#: includes/Admin/views/page.php:105
+#: includes/Database/NarrativeRepository.php:61
+msgid "Na fila"
+msgstr ""
+
+#: includes/Admin/views/page.php:109
+msgid "Como funciona"
+msgstr ""
+
+#: includes/Admin/views/page.php:110
+msgid "gerar → armazenar → servir. A página pública só reproduz conteúdo já gerado; a IA e o TTS rodam na fila, nunca a cada visita."
+msgstr ""
+
+#: includes/Admin/views/page.php:111
+msgid "Shortcode:"
+msgstr ""
+
+#: includes/Admin/views/page.php:112
+msgid "Bloco:"
+msgstr ""
+
+#: includes/Admin/views/page.php:115
+msgid "Privacidade"
+msgstr ""
+
+#: includes/Admin/views/page.php:116
+msgid "Somente metadados públicos entram na narrativa. Cada coleção pode proibir o envio de conteúdo a IA externa e o envio de anexos."
+msgstr ""
+
+#: includes/Admin/views/tab-ai.php:24
+msgid "configurada por wp-config.php"
+msgstr ""
+
+#: includes/Admin/views/tab-ai.php:27
+msgid "Deixe em branco para manter a chave atual; digite __clear__ para removê-la. A chave nunca é exibida nem enviada ao navegador."
+msgstr ""
+
+#: includes/Admin/views/tab-ai.php:41
+msgid "Provedor de IA generativa"
+msgstr ""
+
+#: includes/Admin/views/tab-ai.php:42
+msgid "Opcional. Sem IA, o roteiro é montado pelo template documental (leitura fiel). Com IA, o conteúdo documental é transformado em uma narrativa mais natural, usando exclusivamente as fontes do item."
+msgstr ""
+
+#: includes/Admin/views/tab-ai.php:44
+msgid "Provedor"
+msgstr ""
+
+#: includes/Admin/views/tab-ai.php:54
+#: includes/Admin/views/tab-voice.php:42
+msgid "URL base (terminando em /v1)"
+msgstr ""
+
+#: includes/Admin/views/tab-ai.php:58
+#: includes/Admin/views/tab-ai.php:65
+#: includes/Admin/views/tab-ai.php:76
+#: includes/Admin/views/tab-ai.php:82
+#: includes/Admin/views/tab-voice.php:46
+#: includes/Admin/views/wizard.php:85
+msgid "Modelo"
+msgstr ""
+
+#: includes/Admin/views/tab-ai.php:61
+msgid "Chave de API (opcional em servidores locais)"
+msgstr ""
+
+#: includes/Admin/views/tab-ai.php:68
+msgid "Chave de API da OpenAI"
+msgstr ""
+
+#: includes/Admin/views/tab-ai.php:72
+msgid "URL do Ollama"
+msgstr ""
+
+#: includes/Admin/views/tab-ai.php:85
+msgid "Chave de API do Gemini"
+msgstr ""
+
+#: includes/Admin/views/tab-ai.php:88
+msgid "Usa os conectores de IA configurados no próprio WordPress (7.0+). Nenhuma chave é armazenada por este plugin."
+msgstr ""
+
+#: includes/Admin/views/tab-ai.php:92
+#: includes/Admin/views/tab-voice.php:100
+msgid "Timeout (s)"
+msgstr ""
+
+#: includes/Admin/views/tab-ai.php:93
+msgid "Temperatura"
+msgstr ""
+
+#: includes/Admin/views/tab-ai.php:94
+msgid "Máx. tokens de saída"
+msgstr ""
+
+#: includes/Admin/views/tab-ai.php:95
+msgid "Tamanho do chunk (caracteres)"
+msgstr ""
+
+#: includes/Admin/views/tab-ai.php:98
+msgid "Enviar texto dos anexos a IA externa (pode ser desativado por coleção)"
+msgstr ""
+
+#: includes/Admin/views/tab-ai.php:99
+msgid "Permitir endpoints de rede privada/local (necessário para Ollama, LM Studio, Kokoro e Piper no mesmo servidor). Redirecionamentos ficam desabilitados."
+msgstr ""
+
+#: includes/Admin/views/tab-ai.php:100
+msgid "Habilitar o modo \"Público infantil\" (nunca infantiliza temas sensíveis)"
+msgstr ""
+
+#: includes/Admin/views/tab-ai.php:104
+msgid "Salvar IA"
+msgstr ""
+
+#: includes/Admin/views/tab-ai.php:105
+msgid "Testar IA (configuração salva)"
+msgstr ""
+
+#: includes/Admin/views/tab-ai.php:112
+msgid "O que é enviado à IA"
+msgstr ""
+
+#: includes/Admin/views/tab-ai.php:114
+msgid "Título, descrição, nome da coleção e metadados PÚBLICOS com valor (privados nunca)."
+msgstr ""
+
+#: includes/Admin/views/tab-ai.php:115
+msgid "Texto extraído do documento principal e, se permitido, dos anexos — delimitado como fonte não confiável (instruções dentro dos documentos são ignoradas)."
+msgstr ""
+
+#: includes/Admin/views/tab-ai.php:116
+msgid "Nunca: IDs internos desnecessários, usuários, e-mails, logs, tokens ou dados administrativos."
+msgstr ""
+
+#: includes/Admin/views/tab-ai.php:117
+msgid "Documentos grandes são reduzidos por trechos (resumo factual por chunk → consolidação) antes do roteiro; reduções são cacheadas por hash."
+msgstr ""
+
+#: includes/Admin/views/tab-collections.php:28
+msgid "As narrativas são opt-in por coleção. A configuração global serve como padrão; cada coleção pode sobrescrever."
+msgstr ""
+
+#: includes/Admin/views/tab-collections.php:30
+#: includes/Admin/views/tab-narratives.php:38
+#: includes/Admin/views/tab-narratives.php:62
+msgid "Coleção"
+msgstr ""
+
+#: includes/Admin/views/tab-collections.php:30
+#: includes/Admin/views/tab-collections.php:114
+#: assets/js/block-editor.js:40
+msgid "Narrativa"
+msgstr ""
+
+#: includes/Admin/views/tab-collections.php:30
+#: includes/Admin/views/tab-narratives.php:64
+msgid "Modo"
+msgstr ""
+
+#: includes/Admin/views/tab-collections.php:30
+msgid "Fluxo"
+msgstr ""
+
+#: includes/Admin/views/tab-collections.php:40
+msgid "habilitada"
+msgstr ""
+
+#: includes/Admin/views/tab-collections.php:40
+msgid "desabilitada"
+msgstr ""
+
+#: includes/Admin/views/tab-collections.php:42
+msgid "revisão humana"
+msgstr ""
+
+#: includes/Admin/views/tab-collections.php:42
+msgid "automático"
+msgstr ""
+
+#: includes/Admin/views/tab-collections.php:44
+msgid "Configurar"
+msgstr ""
+
+#: includes/Admin/views/tab-collections.php:46
+msgid "Gerar narrativas dos itens"
+msgstr ""
+
+#. translators: %s: collection name.
+#: includes/Admin/views/tab-collections.php:62
+#, php-format
+msgid "Configuração da coleção: %s"
+msgstr ""
+
+#: includes/Admin/views/tab-collections.php:72
+msgid "Narrativa habilitada nesta coleção"
+msgstr ""
+
+#: includes/Admin/views/tab-collections.php:73
+msgid "Player automático na página do item"
+msgstr ""
+
+#: includes/Admin/views/tab-collections.php:76
+msgid "Fontes"
+msgstr ""
+
+#: includes/Admin/views/tab-collections.php:78
+msgid "Incluir descrição"
+msgstr ""
+
+#: includes/Admin/views/tab-collections.php:79
+msgid "Incluir documento principal"
+msgstr ""
+
+#: includes/Admin/views/tab-collections.php:80
+msgid "Incluir anexos"
+msgstr ""
+
+#: includes/Admin/views/tab-collections.php:84
+msgid "Máximo de anexos (0 = padrão global)"
+msgstr ""
+
+#: includes/Admin/views/tab-collections.php:88
+msgid "Limite de caracteres do item (0 = padrão global)"
+msgstr ""
+
+#: includes/Admin/views/tab-collections.php:93
+msgid "Metadados utilizados"
+msgstr ""
+
+#: includes/Admin/views/tab-collections.php:94
+msgid "Somente metadados públicos podem entrar na narrativa. Sem nenhum marcado, todos os públicos são usados. A ordem dos marcados define a ordem de leitura (arraste não é necessário: a ordem numérica dos IDs marcados segue a ordem da coleção)."
+msgstr ""
+
+#: includes/Admin/views/tab-collections.php:104
+msgid "privado — nunca usado"
+msgstr ""
+
+#: includes/Admin/views/tab-collections.php:104
+msgid "campo dedicado"
+msgstr ""
+
+#: includes/Admin/views/tab-collections.php:109
+msgid "Ordem dos metadados (IDs separados por vírgula, opcional)"
+msgstr ""
+
+#: includes/Admin/views/tab-collections.php:117
+msgid "Modo narrativo"
+msgstr ""
+
+#: includes/Admin/views/tab-collections.php:119
+#: includes/Admin/views/tab-collections.php:128
+#: includes/Admin/views/tab-collections.php:148
+#: includes/Admin/views/tab-collections.php:157
+#: includes/Admin/views/tab-collections.php:175
+msgid "Padrão global"
+msgstr ""
+
+#: includes/Admin/views/tab-collections.php:126
+#: includes/Admin/views/wizard.php:51
+msgid "Fluxo editorial"
+msgstr ""
+
+#: includes/Admin/views/tab-collections.php:129
+msgid "Revisão humana antes do áudio (recomendado)"
+msgstr ""
+
+#: includes/Admin/views/tab-collections.php:130
+#: includes/Admin/views/wizard.php:54
+msgid "Automático: roteiro → áudio"
+msgstr ""
+
+#: includes/Admin/views/tab-collections.php:134
+msgid "Conteúdo sensível"
+msgstr ""
+
+#: includes/Admin/views/tab-collections.php:136
+msgid "Narrativa automática"
+msgstr ""
+
+#: includes/Admin/views/tab-collections.php:137
+msgid "Revisão obrigatória"
+msgstr ""
+
+#: includes/Admin/views/tab-collections.php:138
+msgid "Não gerar narrativa"
+msgstr ""
+
+#: includes/Admin/views/tab-collections.php:143
+msgid "IA e voz"
+msgstr ""
+
+#: includes/Admin/views/tab-collections.php:155
+#: includes/Admin/views/tab-narratives.php:68
+msgid "TTS"
+msgstr ""
+
+#: includes/Admin/views/tab-collections.php:164
+msgid "Voz (vazio = padrão global)"
+msgstr ""
+
+#: includes/Admin/views/tab-collections.php:169
+msgid "Permitir envio do conteúdo a IA externa (fora do servidor)"
+msgstr ""
+
+#: includes/Admin/views/tab-collections.php:170
+msgid "Incluir texto dos anexos no envio à IA externa"
+msgstr ""
+
+#: includes/Admin/views/tab-collections.php:173
+msgid "Permitir download do áudio"
+msgstr ""
+
+#: includes/Admin/views/tab-collections.php:176
+msgid "Sim"
+msgstr ""
+
+#: includes/Admin/views/tab-collections.php:177
+msgid "Não"
+msgstr ""
+
+#: includes/Admin/views/tab-collections.php:182
+msgid "Salvar coleção"
+msgstr ""
+
+#: includes/Admin/views/tab-dashboard.php:21
+msgid "Narrativas prontas"
+msgstr ""
+
+#: includes/Admin/views/tab-dashboard.php:22
+msgid "Pendentes (fila / processando)"
+msgstr ""
+
+#: includes/Admin/views/tab-dashboard.php:24
+msgid "Desatualizadas"
+msgstr ""
+
+#: includes/Admin/views/tab-dashboard.php:25
+msgid "Com erro"
+msgstr ""
+
+#. translators: 1: hours, 2: minutes.
+#: includes/Admin/views/tab-dashboard.php:27
+msgid "Tempo total de áudio"
+msgstr ""
+
+#. translators: 1: hours, 2: minutes.
+#: includes/Admin/views/tab-dashboard.php:27
+#, php-format
+msgid "%1$dh %2$02dmin"
+msgstr ""
+
+#: includes/Admin/views/tab-dashboard.php:28
+msgid "Itens sem texto suficiente"
+msgstr ""
+
+#: includes/Admin/views/tab-dashboard.php:29
+msgid "Itens exigindo OCR"
+msgstr ""
+
+#: includes/Admin/views/tab-dashboard.php:43
+msgid "Gerar narrativa de um item"
+msgstr ""
+
+#: includes/Admin/views/tab-dashboard.php:44
+msgid "Informe o ID de um item Tainacan de uma coleção habilitada. Visualize as fontes antes de gerar para conferir exatamente o que será usado (e, se houver IA externa, enviado)."
+msgstr ""
+
+#: includes/Admin/views/tab-dashboard.php:46
+#: includes/Admin/views/tab-dashboard.php:47
+#: includes/Admin/views/tab-narratives.php:47
+#: includes/Admin/views/tab-narratives.php:48
+msgid "ID do item"
+msgstr ""
+
+#: includes/Admin/views/tab-dashboard.php:48
+msgid "Visualizar fontes"
+msgstr ""
+
+#: includes/Admin/views/tab-dashboard.php:50
+msgid "Gerar narrativa"
+msgstr ""
+
+#: includes/Admin/views/tab-diagnostics.php:21
+msgid "Testar IA"
+msgstr ""
+
+#: includes/Admin/views/tab-diagnostics.php:22
+#: includes/Admin/views/tab-voice.php:105
+msgid "Testar TTS"
+msgstr ""
+
+#: includes/Admin/views/tab-diagnostics.php:23
+#: includes/Admin/views/tab-voice.php:106
+msgid "Gerar áudio de teste"
+msgstr ""
+
+#: includes/Admin/views/tab-diagnostics.php:24
+msgid "Testar escrita"
+msgstr ""
+
+#: includes/Admin/views/tab-diagnostics.php:26
+#: includes/Admin/views/tab-narratives.php:52
+msgid "Executar fila"
+msgstr ""
+
+#: includes/Admin/views/tab-diagnostics.php:46
+msgid "Log recente (sem segredos)"
+msgstr ""
+
+#: includes/Admin/views/tab-diagnostics.php:49
+msgid "Nenhum registro."
+msgstr ""
+
+#: includes/Admin/views/tab-diagnostics.php:53
+msgid "Quando (UTC)"
+msgstr ""
+
+#: includes/Admin/views/tab-diagnostics.php:53
+msgid "Nível"
+msgstr ""
+
+#: includes/Admin/views/tab-diagnostics.php:53
+msgid "Mensagem"
+msgstr ""
+
+#: includes/Admin/views/tab-diagnostics.php:53
+msgid "Contexto"
+msgstr ""
+
+#: includes/Admin/views/tab-narratives.php:25
+#: includes/Admin/views/tab-narratives.php:63
+#: includes/Admin/views/tab-processing.php:34
+msgid "Status"
+msgstr ""
+
+#: includes/Admin/views/tab-narratives.php:27
+msgid "Todos os status"
+msgstr ""
+
+#: includes/Admin/views/tab-narratives.php:40
+msgid "Todas as coleções"
+msgstr ""
+
+#: includes/Admin/views/tab-narratives.php:50
+#: includes/Admin/views/tab-processing.php:27
+msgid "Atualizar"
+msgstr ""
+
+#: includes/Admin/views/tab-narratives.php:61
+#: includes/Admin/views/tab-processing.php:34
+msgid "Item"
+msgstr ""
+
+#: includes/Admin/views/tab-narratives.php:65
+msgid "Duração"
+msgstr ""
+
+#: includes/Admin/views/tab-narratives.php:66
+msgid "Última geração"
+msgstr ""
+
+#: includes/Admin/views/tab-narratives.php:69
+msgid "Ações"
+msgstr ""
+
+#: includes/Admin/views/tab-narratives.php:73
+#: includes/Admin/views/tab-processing.php:35
+msgid "Carregando…"
+msgstr ""
+
+#: includes/Admin/views/tab-narratives.php:83
+msgid "Fechar"
+msgstr ""
+
+#: includes/Admin/views/tab-narratives.php:86
+msgid "Roteiro"
+msgstr ""
+
+#: includes/Admin/views/tab-narratives.php:87
+msgid "Fontes e saúde"
+msgstr ""
+
+#: includes/Admin/views/tab-narratives.php:88
+msgid "Rastreabilidade"
+msgstr ""
+
+#: includes/Admin/views/tab-narratives.php:92
+msgid "Roteiro narrado (edite antes de aprovar; a edição humana nunca é sobrescrita pela IA)"
+msgstr ""
+
+#: includes/Admin/views/tab-narratives.php:96
+msgid "Salvar roteiro"
+msgstr ""
+
+#: includes/Admin/views/tab-narratives.php:97
+msgid "Aprovar e gerar áudio"
+msgstr ""
+
+#: includes/Admin/views/tab-narratives.php:98
+msgid "Restaurar texto gerado"
+msgstr ""
+
+#: includes/Admin/views/tab-processing.php:19
+msgid "Fila de processamento"
+msgstr ""
+
+#: includes/Admin/views/tab-processing.php:22
+msgid "Executar fila agora"
+msgstr ""
+
+#: includes/Admin/views/tab-processing.php:25
+msgid "Limpar jobs com falha"
+msgstr ""
+
+#: includes/Admin/views/tab-processing.php:31
+msgid "Cada job percorre extração → roteiro → áudio de forma idempotente. Falhas temporárias são reagendadas com backoff (1, 3, 9 min); na última tentativa, uma IA indisponível cai para o roteiro por template. Um lock impede duas gerações simultâneas do mesmo item."
+msgstr ""
+
+#: includes/Admin/views/tab-processing.php:34
+msgid "Ação"
+msgstr ""
+
+#: includes/Admin/views/tab-processing.php:34
+msgid "Etapa"
+msgstr ""
+
+#: includes/Admin/views/tab-processing.php:34
+msgid "Tentativas"
+msgstr ""
+
+#: includes/Admin/views/tab-processing.php:34
+msgid "Atualizado"
+msgstr ""
+
+#: includes/Admin/views/tab-processing.php:47
+msgid "Gatilhos e limites"
+msgstr ""
+
+#: includes/Admin/views/tab-processing.php:49
+msgid "Ao salvar um item / documento / metadado"
+msgstr ""
+
+#: includes/Admin/views/tab-processing.php:51
+msgid "Recalcular hash e marcar como desatualizada (padrão)"
+msgstr ""
+
+#: includes/Admin/views/tab-processing.php:52
+msgid "Marcar como desatualizada e colocar regeneração na fila"
+msgstr ""
+
+#: includes/Admin/views/tab-processing.php:53
+msgid "Não fazer nada (somente manual / varredura diária)"
+msgstr ""
+
+#: includes/Admin/views/tab-processing.php:55
+msgid "A verificação roda 90 s depois, via WP-Cron, nunca dentro do save_post."
+msgstr ""
+
+#: includes/Admin/views/tab-processing.php:58
+msgid "Processar a fila automaticamente via WP-Cron (a cada minuto, com lock e orçamento de tempo)"
+msgstr ""
+
+#: includes/Admin/views/tab-processing.php:61
+msgid "Jobs por execução"
+msgstr ""
+
+#: includes/Admin/views/tab-processing.php:62
+msgid "Orçamento de tempo por execução (s)"
+msgstr ""
+
+#: includes/Admin/views/tab-processing.php:63
+msgid "Máximo de tentativas"
+msgstr ""
+
+#: includes/Admin/views/tab-processing.php:66
+msgid "Máx. caracteres por item"
+msgstr ""
+
+#: includes/Admin/views/tab-processing.php:67
+msgid "Máx. caracteres por arquivo"
+msgstr ""
+
+#: includes/Admin/views/tab-processing.php:68
+msgid "Máx. anexos por item"
+msgstr ""
+
+#: includes/Admin/views/tab-processing.php:69
+msgid "Versões mantidas por item (0 = todas)"
+msgstr ""
+
+#: includes/Admin/views/tab-processing.php:72
+msgid "todas"
+msgstr ""
+
+#: includes/Admin/views/tab-processing.php:78
+msgid "Salvar processamento"
+msgstr ""
+
+#: includes/Admin/views/tab-settings.php:27
+msgid "Geral"
+msgstr ""
+
+#: includes/Admin/views/tab-settings.php:29
+msgid "Ativar narrativas"
+msgstr ""
+
+#: includes/Admin/views/tab-settings.php:29
+msgid "(sem isso nada é gerado nem exibido)"
+msgstr ""
+
+#: includes/Admin/views/tab-settings.php:30
+msgid "Player automático na página pública do item (após os anexos)"
+msgstr ""
+
+#: includes/Admin/views/tab-settings.php:31
+msgid "Permitir download do áudio (padrão; a coleção pode sobrescrever)"
+msgstr ""
+
+#: includes/Admin/views/tab-settings.php:32
+msgid "Exibir nota de proveniência discreta no player"
+msgstr ""
+
+#: includes/Admin/views/tab-settings.php:36
+msgid "Modo narrativo padrão"
+msgstr ""
+
+#: includes/Admin/views/tab-settings.php:45
+msgid "Fluxo editorial padrão"
+msgstr ""
+
+#: includes/Admin/views/tab-settings.php:47
+msgid "B — IA → roteiro pendente → revisor → aprovação → TTS (recomendado para acervos históricos)"
+msgstr ""
+
+#: includes/Admin/views/tab-settings.php:48
+msgid "A — IA → áudio automaticamente"
+msgstr ""
+
+#: includes/Admin/views/tab-settings.php:52
+msgid "Idioma das narrativas"
+msgstr ""
+
+#: includes/Admin/views/tab-settings.php:56
+msgid "Fontes padrão"
+msgstr ""
+
+#: includes/Admin/views/tab-settings.php:58
+msgid "Descrição"
+msgstr ""
+
+#: includes/Admin/views/tab-settings.php:59
+msgid "Documento principal"
+msgstr ""
+
+#: includes/Admin/views/tab-settings.php:60
+msgid "Anexos"
+msgstr ""
+
+#: includes/Admin/views/tab-settings.php:65
+msgid "Template da leitura documental (sem IA)"
+msgstr ""
+
+#: includes/Admin/views/tab-settings.php:66
+msgid "Placeholders: {title} {collection} {description} {metadata} {document_intro} {document} {attachments} {closing}. Linhas cujos placeholders ficarem vazios são omitidas. Deixe em branco para usar o padrão."
+msgstr ""
+
+#: includes/Admin/views/tab-settings.php:68
+msgid "Ver template padrão"
+msgstr ""
+
+#: includes/Admin/views/tab-settings.php:72
+msgid "Avançado"
+msgstr ""
+
+#: includes/Admin/views/tab-settings.php:74
+msgid "Modo debug (registra requisições HTTP sem segredos no log interno)"
+msgstr ""
+
+#: includes/Admin/views/tab-settings.php:75
+msgid "Apagar todos os dados (roteiros, áudios, tabelas e opções) ao desinstalar o plugin"
+msgstr ""
+
+#: includes/Admin/views/tab-settings.php:77
+msgid "Chaves de API também podem ser definidas no wp-config.php: TN_AI_API_KEY, TN_GEMINI_API_KEY, TN_TTS_API_KEY. Quando definidas, o campo fica bloqueado no painel."
+msgstr ""
+
+#: includes/Admin/views/tab-settings.php:79
+msgid "Salvar configurações"
+msgstr ""
+
+#: includes/Admin/views/tab-voice.php:28
+msgid "Síntese de voz (TTS)"
+msgstr ""
+
+#: includes/Admin/views/tab-voice.php:29
+msgid "Estratégia: TTS neural configurado → áudio gerado e armazenado na biblioteca de mídia. Caso contrário → voz do navegador do visitante (Web Speech API), sem servidor e sem CDN."
+msgstr ""
+
+#: includes/Admin/views/tab-voice.php:31
+msgid "Mecanismo"
+msgstr ""
+
+#: includes/Admin/views/tab-voice.php:40
+msgid "Compatível com Kokoro-FastAPI (recomendado: open source, vozes pt-BR como pf_dora/pm_alex, roda em CPU), LocalAI, OpenedAI-Speech e a própria OpenAI. Endpoint: POST {base}/audio/speech."
+msgstr ""
+
+#: includes/Admin/views/tab-voice.php:48
+msgid "Formato"
+msgstr ""
+
+#: includes/Admin/views/tab-voice.php:56
+msgid "Token de API (opcional)"
+msgstr ""
+
+#: includes/Admin/views/tab-voice.php:58
+msgid "configurado por wp-config.php"
+msgstr ""
+
+#: includes/Admin/views/tab-voice.php:61
+msgid "Em branco mantém o atual; __clear__ remove. Nunca é exposto ao navegador."
+msgstr ""
+
+#: includes/Admin/views/tab-voice.php:68
+msgid "URL do servidor Piper"
+msgstr ""
+
+#: includes/Admin/views/tab-voice.php:72
+msgid "Voz (ex.: pt_BR-faber-medium)"
+msgstr ""
+
+#: includes/Admin/views/tab-voice.php:73
+msgid "Formato da requisição"
+msgstr ""
+
+#: includes/Admin/views/tab-voice.php:75
+msgid "JSON {\"text\",\"voice\"} (piper1-gpl)"
+msgstr ""
+
+#: includes/Admin/views/tab-voice.php:76
+msgid "Texto puro no corpo (rhasspy/piper legado)"
+msgstr ""
+
+#: includes/Admin/views/tab-voice.php:83
+msgid "Usa um conector do WordPress AI (7.0+) com suporte a texto-fala. A voz é definida pelo conector."
+msgstr ""
+
+#: includes/Admin/views/tab-voice.php:87
+msgid "Sem áudio no servidor: o roteiro é armazenado e o navegador do visitante o sintetiza localmente. Funciona em qualquer hospedagem."
+msgstr ""
+
+#: includes/Admin/views/tab-voice.php:90
+msgid "Voz do navegador (fallback)"
+msgstr ""
+
+#: includes/Admin/views/tab-voice.php:92
+msgid "Idioma"
+msgstr ""
+
+#: includes/Admin/views/tab-voice.php:93
+msgid "Preferência de voz (trecho do nome, ex.: \"Francisca\")"
+msgstr ""
+
+#: includes/Admin/views/tab-voice.php:94
+msgid "Velocidade padrão"
+msgstr ""
+
+#: includes/Admin/views/tab-voice.php:97
+msgid "Parâmetros"
+msgstr ""
+
+#: includes/Admin/views/tab-voice.php:99
+msgid "Velocidade da síntese"
+msgstr ""
+
+#: includes/Admin/views/tab-voice.php:104
+msgid "Salvar voz"
+msgstr ""
+
+#: includes/Admin/views/wizard.php:21
+msgid "Bem-vindo ao Tainacan Narrativas"
+msgstr ""
+
+#: includes/Admin/views/wizard.php:22
+msgid "Cinco passos para transformar itens em narrativas em áudio. Nada é gerado nem enviado a serviços externos antes de você concluir esta configuração."
+msgstr ""
+
+#: includes/Admin/views/wizard.php:24
+msgid "Peça a um administrador para concluir a configuração inicial."
+msgstr ""
+
+#: includes/Admin/views/wizard.php:30
+msgid "Escolha as coleções"
+msgstr ""
+
+#: includes/Admin/views/wizard.php:32
+msgid "Nenhuma coleção encontrada. Crie uma coleção no Tainacan primeiro."
+msgstr ""
+
+#: includes/Admin/views/wizard.php:40
+msgid "Escolha o modo de narrativa"
+msgstr ""
+
+#: includes/Admin/views/wizard.php:53
+msgid "Revisão humana antes do áudio (recomendado para acervos históricos)"
+msgstr ""
+
+#: includes/Admin/views/wizard.php:58
+msgid "Escolha a voz"
+msgstr ""
+
+#: includes/Admin/views/wizard.php:68
+msgid "URL base do serviço (ex.: Kokoro-FastAPI)"
+msgstr ""
+
+#: includes/Admin/views/wizard.php:72
+msgid "Sem TTS neural, a voz do navegador do visitante é usada — funciona em qualquer hospedagem. Você pode configurar Piper/Kokoro depois na aba Voz."
+msgstr ""
+
+#: includes/Admin/views/wizard.php:74
+msgid "Configure a IA (opcional)"
+msgstr ""
+
+#: includes/Admin/views/wizard.php:84
+msgid "URL base (…/v1)"
+msgstr ""
+
+#: includes/Admin/views/wizard.php:88
+msgid "Informe a chave na aba IA (ou TN_AI_API_KEY no wp-config.php) depois de concluir."
+msgstr ""
+
+#: includes/Admin/views/wizard.php:89
+msgid "Informe a chave na aba IA (ou TN_GEMINI_API_KEY no wp-config.php) depois de concluir."
+msgstr ""
+
+#: includes/Admin/views/wizard.php:91
+msgid "Meus serviços (Ollama/Kokoro/Piper) rodam em rede privada/local — permitir endpoints privados"
+msgstr ""
+
+#: includes/Admin/views/wizard.php:94
+msgid "Gere um item de teste"
+msgstr ""
+
+#: includes/Admin/views/wizard.php:96
+msgid "ID de um item (de uma coleção marcada acima). Opcional."
+msgstr ""
+
+#: includes/Admin/views/wizard.php:101
+msgid "Concluir configuração"
+msgstr ""
+
+#: includes/Admin/views/wizard.php:102
+msgid "Pular configuração"
+msgstr ""
+
+#: includes/AI/AbstractHttpProvider.php:124
+msgid "Resposta inválida do serviço (JSON malformado)."
+msgstr ""
+
+#. translators: 1: HTTP status code, 2: error message from the service.
+#: includes/AI/AbstractHttpProvider.php:166
+#, php-format
+msgid "Serviço respondeu HTTP %1$d: %2$s"
+msgstr ""
+
+#: includes/AI/GeminiProvider.php:104
+msgid "Chave do Gemini não configurada."
+msgstr ""
+
+#. translators: %s: finish/block reason reported by Gemini.
+#: includes/AI/GeminiProvider.php:139
+#, php-format
+msgid "O Gemini não devolveu texto (motivo: %s)."
+msgstr ""
+
+#: includes/AI/GeminiProvider.php:140
+#: includes/AI/OpenAICompatibleProvider.php:134
+msgid "O modelo devolveu uma resposta vazia ou em formato inesperado."
+msgstr ""
+
+#: includes/AI/GeminiProvider.php:160
+msgid "Informe a chave de API do Gemini."
+msgstr ""
+
+#: includes/AI/GeminiProvider.php:174
+#: includes/AI/OpenAICompatibleProvider.php:163
+msgid "Conexão OK; modelo disponível."
+msgstr ""
+
+#: includes/AI/OpenAICompatibleProvider.php:67
+msgid "Servidor compatível com OpenAI (Ollama, LM Studio, vLLM, LocalAI…)"
+msgstr ""
+
+#: includes/AI/OpenAICompatibleProvider.php:110
+msgid "Provedor de IA não configurado."
+msgstr ""
+
+#: includes/AI/OpenAICompatibleProvider.php:153
+msgid "Informe a URL base e o modelo."
+msgstr ""
+
+#: includes/AI/OpenAICompatibleProvider.php:164
+msgid "Conexão OK, mas o modelo configurado não aparece na lista do servidor."
+msgstr ""
+
+#: includes/AI/OpenAICompatibleProvider.php:189
+msgid "Conexão OK (resposta de teste recebida)."
+msgstr ""
+
+#: includes/AI/ProviderManager.php:78
+msgid "Sem IA (roteiro documental por template)"
+msgstr ""
+
+#: includes/AI/ProviderManager.php:95
+msgid "IA desativada para esta coleção."
+msgstr ""
+
+#: includes/AI/ProviderManager.php:100
+msgid "Provedor de IA configurado não existe."
+msgstr ""
+
+#: includes/AI/ProviderManager.php:104
+msgid "Provedor de IA não configurado (URL, modelo ou chave ausentes)."
+msgstr ""
+
+#: includes/AI/ProviderManager.php:108
+msgid "A coleção não permite envio de conteúdo a IA externa."
+msgstr ""
+
+#: includes/AI/WordPressAIProvider.php:47
+#: includes/TTS/WordPressAITTSProvider.php:47
+msgid "WordPress AI (conectores do próprio site, WP 7.0+)"
+msgstr ""
+
+#: includes/AI/WordPressAIProvider.php:91
+msgid "O AI Client do WordPress não está disponível nesta instalação."
+msgstr ""
+
+#: includes/AI/WordPressAIProvider.php:105
+msgid "O modelo devolveu uma resposta vazia."
+msgstr ""
+
+#: includes/AI/WordPressAIProvider.php:144
+msgid "Requer WordPress 7.0+ com o AI Client."
+msgstr ""
+
+#: includes/AI/WordPressAIProvider.php:152
+msgid "Um conector de IA com geração de texto está configurado no WordPress."
+msgstr ""
+
+#: includes/AI/WordPressAIProvider.php:153
+msgid "Nenhum conector de IA com geração de texto está configurado no WordPress (Configurações → IA)."
+msgstr ""
+
+#: includes/Core/Activator.php:32
+msgid "Tainacan Narrativas requer PHP 8.0 ou superior."
+msgstr ""
+
+#: includes/Core/Activator.php:33
+msgid "Erro de ativação"
+msgstr ""
+
+#: includes/Core/Plugin.php:97
+msgid "A cada minuto (Tainacan Narrativas)"
+msgstr ""
+
+#: includes/Core/Plugin.php:216
+msgid "Tainacan Narrativas requer o plugin Tainacan ativo."
+msgstr ""
+
+#: includes/Database/NarrativeRepository.php:60
+msgid "Não gerada"
+msgstr ""
+
+#: includes/Database/NarrativeRepository.php:62
+msgid "Processando texto"
+msgstr ""
+
+#: includes/Database/NarrativeRepository.php:63
+msgid "Gerando roteiro"
+msgstr ""
+
+#: includes/Database/NarrativeRepository.php:65
+msgid "Gerando áudio"
+msgstr ""
+
+#: includes/Database/NarrativeRepository.php:66
+msgid "Pronta"
+msgstr ""
+
+#: includes/Database/NarrativeRepository.php:67
+msgid "Desatualizada"
+msgstr ""
+
+#: includes/Database/NarrativeRepository.php:69
+msgid "OCR necessário"
+msgstr ""
+
+#: includes/Database/NarrativeRepository.php:70
+msgid "Conteúdo insuficiente"
+msgstr ""
+
+#: includes/Documents/DocxExtractor.php:52
+#: includes/Documents/OdtExtractor.php:52
+msgid "Extensão PHP zip indisponível."
+msgstr ""
+
+#: includes/Documents/DocxExtractor.php:56
+msgid "Arquivo DOCX inválido."
+msgstr ""
+
+#: includes/Documents/DocxExtractor.php:61
+msgid "DOCX sem conteúdo principal."
+msgstr ""
+
+#: includes/Documents/DocxExtractor.php:72
+msgid "DOCX sem texto."
+msgstr ""
+
+#: includes/Documents/ExtractorManager.php:104
+msgid "Anexo não encontrado."
+msgstr ""
+
+#: includes/Documents/ExtractorManager.php:110
+msgid "Arquivo web archive (reproduzido pelo WACZ Player); ignorado na narrativa."
+msgstr ""
+
+#: includes/Documents/ExtractorManager.php:115
+msgid "Mídia sem camada textual."
+msgstr ""
+
+#: includes/Documents/ExtractorManager.php:126
+msgid "Arquivo do anexo indisponível no servidor."
+msgstr ""
+
+#: includes/Documents/ExtractorManager.php:267
+msgid "Falha na extração de texto."
+msgstr ""
+
+#: includes/Documents/ExtractorManager.php:270
+msgid "Formato de arquivo sem extrator de texto."
+msgstr ""
+
+#: includes/Documents/OdtExtractor.php:56
+msgid "Arquivo ODT inválido."
+msgstr ""
+
+#: includes/Documents/OdtExtractor.php:61
+msgid "ODT sem conteúdo principal."
+msgstr ""
+
+#: includes/Documents/OdtExtractor.php:73
+msgid "ODT sem texto."
+msgstr ""
+
+#: includes/Documents/PdfExtractor.php:80
+msgid "Biblioteca de PDF indisponível."
+msgstr ""
+
+#: includes/Documents/PdfExtractor.php:84
+msgid "PDF grande demais para extração em PHP."
+msgstr ""
+
+#: includes/Documents/PdfExtractor.php:97
+msgid "Falha ao ler o PDF."
+msgstr ""
+
+#: includes/Documents/PdfExtractor.php:108
+msgid "PDF provavelmente digitalizado: camada de texto ausente."
+msgstr ""
+
+#: includes/Documents/PdfExtractor.php:111
+msgid "Texto do PDF ilegível (fontes sem mapeamento); recomenda-se OCR."
+msgstr ""
+
+#: includes/Documents/PdfExtractor.php:114
+msgid "PDF sem texto."
+msgstr ""
+
+#: includes/Documents/TextExtractor.php:75
+msgid "Não foi possível ler o arquivo."
+msgstr ""
+
+#: includes/Documents/TextExtractor.php:95
+msgid "Arquivo sem texto."
+msgstr ""
+
+#: includes/Frontend/Assets.php:39
+msgid "Reproduzir"
+msgstr ""
+
+#: includes/Frontend/Assets.php:40
+msgid "Pausar"
+msgstr ""
+
+#: includes/Frontend/Assets.php:41
+msgid "Continuar"
+msgstr ""
+
+#: includes/Frontend/Assets.php:42
+msgid "Voltar 10 segundos"
+msgstr ""
+
+#: includes/Frontend/Assets.php:43
+msgid "Avançar 10 segundos"
+msgstr ""
+
+#: includes/Frontend/Assets.php:44
+msgid "Posição da reprodução"
+msgstr ""
+
+#: includes/Frontend/Assets.php:45
+msgid "Volume"
+msgstr ""
+
+#: includes/Frontend/Assets.php:46
+msgid "Velocidade"
+msgstr ""
+
+#: includes/Frontend/Assets.php:47
+#: includes/Frontend/views/player.php:55
+msgid "Ver texto"
+msgstr ""
+
+#: includes/Frontend/Assets.php:48
+msgid "Ocultar texto"
+msgstr ""
+
+#: includes/Frontend/Assets.php:49
+#: includes/Frontend/views/player.php:68
+msgid "Baixar áudio"
+msgstr ""
+
+#: includes/Frontend/Assets.php:50
+msgid "Seu navegador não oferece síntese de voz. O texto da narrativa está disponível abaixo."
+msgstr ""
+
+#: includes/Frontend/Assets.php:51
+msgid "Preparando a voz…"
+msgstr ""
+
+#: includes/Frontend/Assets.php:52
+#: includes/Frontend/views/player.php:38
+msgid "Voz do navegador"
+msgstr ""
+
+#. translators: 1: current time, 2: total duration.
+#: includes/Frontend/Assets.php:53
+#, php-format
+msgid "%1$s de %2$s"
+msgstr ""
+
+#. translators: 1: current time, 2: total duration.
+#: includes/Frontend/Assets.php:54
+msgid "Não foi possível reproduzir o áudio."
+msgstr ""
+
+#: includes/Frontend/Block.php:103
+msgid "Nenhuma narrativa pronta para este item (ou item não informado)."
+msgstr ""
+
+#: includes/Frontend/Player.php:182
+msgid "Ouvir este item"
+msgstr ""
+
+#: includes/Frontend/views/player.php:49
+msgid "Ative o JavaScript para ouvir a narrativa com a voz do navegador. O texto completo está disponível abaixo."
+msgstr ""
+
+#: includes/Narrative/ContentScore.php:101
+msgid "Insuficiente"
+msgstr ""
+
+#: includes/Narrative/ContentScore.php:102
+msgid "Básico"
+msgstr ""
+
+#: includes/Narrative/ContentScore.php:103
+msgid "Bom"
+msgstr ""
+
+#: includes/Narrative/ContentScore.php:104
+msgid "Extenso"
+msgstr ""
+
+#: includes/Narrative/Modes.php:32
+msgid "Leitura fiel"
+msgstr ""
+
+#: includes/Narrative/Modes.php:33
+msgid "Praticamente nenhuma reescrita: metadados, descrição e documentos lidos como estão."
+msgstr ""
+
+#: includes/Narrative/Modes.php:38
+msgid "Narrativa documental"
+msgstr ""
+
+#: includes/Narrative/Modes.php:39
+msgid "Texto fluido para ser ouvido, mantendo rigor documental. Padrão recomendado."
+msgstr ""
+
+#: includes/Narrative/Modes.php:44
+msgid "História contextualizada"
+msgstr ""
+
+#: includes/Narrative/Modes.php:45
+msgid "Storytelling moderado, exclusivamente a partir das fontes fornecidas."
+msgstr ""
+
+#: includes/Narrative/Modes.php:50
+msgid "Resumo em áudio"
+msgstr ""
+
+#: includes/Narrative/Modes.php:51
+msgid "Entre 1 e 3 minutos."
+msgstr ""
+
+#: includes/Narrative/Modes.php:56
+msgid "Narrativa detalhada"
+msgstr ""
+
+#: includes/Narrative/Modes.php:57
+msgid "Entre 5 e 10 minutos, conforme a quantidade de conteúdo."
+msgstr ""
+
+#: includes/Narrative/Modes.php:62
+msgid "Linguagem simples"
+msgstr ""
+
+#: includes/Narrative/Modes.php:63
+msgid "Texto acessível ao público geral, frases curtas e vocabulário comum."
+msgstr ""
+
+#: includes/Narrative/Modes.php:70
+msgid "Público infantil"
+msgstr ""
+
+#: includes/Narrative/Modes.php:71
+msgid "Somente quando habilitado explicitamente. Não infantiliza temas sensíveis."
+msgstr ""
+
+#: includes/Narrative/NarrativeGenerator.php:102
+msgid "A IA devolveu um roteiro vazio ou inutilizável."
+msgstr ""
+
+#: includes/Narrative/NarrativeManager.php:170
+#: includes/Narrative/NarrativeManager.php:205
+#: includes/Narrative/NarrativeManager.php:317
+#: includes/Narrative/NarrativeManager.php:609
+#: includes/Narrative/NarrativeManager.php:638
+msgid "Item Tainacan não encontrado."
+msgstr ""
+
+#: includes/Narrative/NarrativeManager.php:291
+msgid "Texto narrativo produzido automaticamente a partir das informações documentais deste registro."
+msgstr ""
+
+#: includes/Narrative/NarrativeManager.php:292
+msgid "Narrativa produzida a partir das informações deste registro."
+msgstr ""
+
+#: includes/Narrative/NarrativeManager.php:322
+#: includes/Narrative/NarrativeManager.php:642
+msgid "Narrativas não estão habilitadas para a coleção deste item."
+msgstr ""
+
+#: includes/Narrative/NarrativeManager.php:325
+msgid "A coleção está marcada como sensível: não gerar narrativa."
+msgstr ""
+
+#: includes/Narrative/NarrativeManager.php:331
+#: includes/Narrative/NarrativeManager.php:495
+msgid "Já existe uma geração em andamento para este item."
+msgstr ""
+
+#: includes/Narrative/NarrativeManager.php:375
+msgid "Não foi possível gravar a narrativa."
+msgstr ""
+
+#: includes/Narrative/NarrativeManager.php:384
+msgid "Documento digitalizado sem camada de texto: é necessário OCR para narrar o conteúdo."
+msgstr ""
+
+#: includes/Narrative/NarrativeManager.php:385
+msgid "Conteúdo textual insuficiente para uma narrativa."
+msgstr ""
+
+#: includes/Narrative/NarrativeManager.php:435
+#: includes/Narrative/NarrativeManager.php:436
+msgid "Roteiro vazio."
+msgstr ""
+
+#: includes/Narrative/NarrativeManager.php:492
+msgid "Não há roteiro para aprovar."
+msgstr ""
+
+#: includes/Narrative/NarrativeManager.php:530
+msgid "Não há narrativa para editar."
+msgstr ""
+
+#: includes/Narrative/NarrativeManager.php:534
+msgid "O roteiro não pode ficar vazio."
+msgstr ""
+
+#: includes/Narrative/NarrativeManager.php:559
+msgid "Não há narrativa."
+msgstr ""
+
+#: includes/Narrative/NarrativeManager.php:722
+msgid "TTS neural indisponível; usando a voz do navegador."
+msgstr ""
+
+#. translators: 1: item title, 2: version number.
+#: includes/Narrative/NarrativeManager.php:752
+#, php-format
+msgid "Narrativa: %1$s (v%2$d)"
+msgstr ""
+
+#: includes/Narrative/ScriptBuilder.php:37
+msgid "Você está ouvindo o registro \"{title}\"."
+msgstr ""
+
+#: includes/Narrative/ScriptBuilder.php:38
+msgid "Este item integra a coleção {collection}."
+msgstr ""
+
+#. translators: 1: attachment number, 2: file name.
+#: includes/Narrative/ScriptBuilder.php:90
+#, php-format
+msgid "Anexo %1$d, %2$s:"
+msgstr ""
+
+#: includes/Narrative/ScriptBuilder.php:98
+msgid "A documentação associada ao item registra o seguinte:"
+msgstr ""
+
+#: includes/Narrative/ScriptBuilder.php:101
+msgid "Este registro contém mais informações do que as narradas aqui. Consulte a página do item para o conteúdo completo."
+msgstr ""
+
+#: includes/Narrative/ScriptBuilder.php:227
+msgid "arquivo"
+msgstr ""
+
+#: includes/REST/Controller.php:402
+msgid "Item indisponível."
+msgstr ""
+
+#: includes/REST/Controller.php:405
+msgid "Narrativas não habilitadas para esta coleção."
+msgstr ""
+
+#: includes/REST/Controller.php:463
+msgid "Nenhuma narrativa disponível para este item."
+msgstr ""
+
+#: includes/REST/Controller.php:586
+msgid "Sem narrativa para este item."
+msgstr ""
+
+#: includes/REST/Controller.php:809
+msgid "Provedor não encontrado ou não selecionado."
+msgstr ""
+
+#: includes/REST/Controller.php:836
+msgid "Gravação no diretório de uploads OK."
+msgstr ""
+
+#: includes/REST/Controller.php:853
+msgid "O TTS selecionado roda no navegador; use o player de teste abaixo."
+msgstr ""
+
+#: includes/REST/Controller.php:857
+msgid "Este é um áudio de teste do Tainacan Narrativas."
+msgstr ""
+
+#: includes/Security/Security.php:42
+msgid "Endpoint não configurado."
+msgstr ""
+
+#: includes/Security/Security.php:46
+msgid "Endpoint inválido."
+msgstr ""
+
+#: includes/Security/Security.php:49
+msgid "Somente http:// e https:// são permitidos."
+msgstr ""
+
+#: includes/Security/Security.php:52
+msgid "Credenciais na URL não são permitidas."
+msgstr ""
+
+#: includes/Security/Security.php:57
+msgid "Porta não permitida."
+msgstr ""
+
+#: includes/Security/Security.php:65
+msgid "O endpoint aponta para uma rede privada/local. Habilite \"Permitir endpoints de rede privada\" nas configurações se isso for intencional."
+msgstr ""
+
+#: includes/Tainacan/ContentCollector.php:118
+msgid "Ignorado: limite total de caracteres do item atingido."
+msgstr ""
+
+#. translators: %d: number of public metadata with values.
+#: includes/Tainacan/ContentCollector.php:134
+#, php-format
+msgid "%d metadado com valor"
+msgid_plural "%d metadados com valor"
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/Tainacan/ContentCollector.php:135
+msgid "Descrição presente"
+msgstr ""
+
+#: includes/Tainacan/ContentCollector.php:135
+msgid "Sem descrição"
+msgstr ""
+
+#: includes/Tainacan/ContentCollector.php:141
+msgid "Documento"
+msgstr ""
+
+#: includes/Tainacan/ContentCollector.php:143
+msgid "Item sem documento principal"
+msgstr ""
+
+#: includes/Tainacan/ContentCollector.php:149
+msgid "Anexo"
+msgstr ""
+
+#. translators: %d: number of private metadata skipped.
+#: includes/Tainacan/ContentCollector.php:153
+#, php-format
+msgid "%d metadado(s) privado(s) não utilizado(s)"
+msgstr ""
+
+#. translators: %d: number of web archive files skipped.
+#: includes/Tainacan/ContentCollector.php:157
+#, php-format
+msgid "%d arquivo(s) web archive (.wacz/.warc) reservado(s) ao WACZ Player"
+msgstr ""
+
+#: includes/Tainacan/ContentCollector.php:305
+msgid "Documento externo (URL): conteúdo remoto não é lido."
+msgstr ""
+
+#. translators: 1: Document/Attachment, 2: file name, 3: character count.
+#: includes/Tainacan/ContentCollector.php:409
+#, php-format
+msgid "%1$s %2$s: %3$s caracteres"
+msgstr ""
+
+#. translators: 1: Document/Attachment, 2: file name, 3: status message.
+#: includes/Tainacan/ContentCollector.php:413
+#, php-format
+msgid "%1$s %2$s: %3$s"
+msgstr ""
+
+#: includes/TTS/AudioConcat.php:32
+msgid "Nenhum áudio recebido do serviço de voz."
+msgstr ""
+
+#: includes/TTS/AudioConcat.php:43
+msgid "O formato de áudio não pode ser concatenado sem ffmpeg; reduza o roteiro ou use MP3/WAV."
+msgstr ""
+
+#: includes/TTS/AudioConcat.php:94
+msgid "Trecho WAV inválido recebido do serviço de voz."
+msgstr ""
+
+#: includes/TTS/AudioConcat.php:99
+msgid "Trechos WAV com formatos diferentes não podem ser unidos."
+msgstr ""
+
+#: includes/TTS/AudioConcat.php:104
+msgid "Nenhum WAV válido."
+msgstr ""
+
+#: includes/TTS/AudioStorage.php:45
+msgid "Áudio vazio."
+msgstr ""
+
+#: includes/TTS/AudioStorage.php:64
+msgid "Não foi possível gravar o áudio no diretório de uploads."
+msgstr ""
+
+#: includes/TTS/AudioStorage.php:81
+msgid "Falha ao registrar o áudio na biblioteca de mídia."
+msgstr ""
+
+#: includes/TTS/BrowserProvider.php:39
+msgid "Voz do navegador (Web Speech API, sem servidor)"
+msgstr ""
+
+#: includes/TTS/BrowserProvider.php:79
+msgid "A voz do navegador é sintetizada no dispositivo do visitante; não há áudio no servidor."
+msgstr ""
+
+#: includes/TTS/BrowserProvider.php:88
+msgid "Sempre disponível. A qualidade da voz depende do navegador/sistema do visitante; para áudio idêntico para todos, configure um TTS neural."
+msgstr ""
+
+#: includes/TTS/OpenAICompatibleTTSProvider.php:71
+msgid "TTS neural via API compatível com OpenAI (Kokoro-FastAPI, LocalAI, OpenAI…)"
+msgstr ""
+
+#: includes/TTS/OpenAICompatibleTTSProvider.php:121
+msgid "Endpoint de TTS não configurado."
+msgstr ""
+
+#: includes/TTS/OpenAICompatibleTTSProvider.php:133
+msgid "Roteiros longos exigem formato MP3 ou WAV para concatenação."
+msgstr ""
+
+#: includes/TTS/OpenAICompatibleTTSProvider.php:149
+msgid "O serviço de voz não devolveu áudio."
+msgstr ""
+
+#: includes/TTS/OpenAICompatibleTTSProvider.php:172
+msgid "Informe a URL base do serviço de voz (ex.: http://kokoro:8880/v1)."
+msgstr ""
+
+#: includes/TTS/OpenAICompatibleTTSProvider.php:182
+msgid "Conexão OK; voz disponível."
+msgstr ""
+
+#: includes/TTS/OpenAICompatibleTTSProvider.php:183
+msgid "Conexão OK, mas a voz configurada não aparece na lista do serviço."
+msgstr ""
+
+#: includes/TTS/OpenAICompatibleTTSProvider.php:200
+msgid "Conexão OK (áudio de teste recebido)."
+msgstr ""
+
+#: includes/TTS/PiperHttpProvider.php:60
+msgid "Piper (servidor HTTP local, WAV)"
+msgstr ""
+
+#: includes/TTS/PiperHttpProvider.php:101
+msgid "URL do servidor Piper não configurada."
+msgstr ""
+
+#: includes/TTS/PiperHttpProvider.php:134
+msgid "O servidor Piper não devolveu um WAV válido."
+msgstr ""
+
+#: includes/TTS/PiperHttpProvider.php:157
+msgid "Informe a URL do servidor Piper (ex.: http://127.0.0.1:5000)."
+msgstr ""
+
+#: includes/TTS/PiperHttpProvider.php:171
+msgid "Conexão OK (WAV de teste recebido)."
+msgstr ""
+
+#: includes/TTS/WordPressAITTSProvider.php:95
+msgid "Nenhum conector do WordPress AI com conversão texto-fala está configurado."
+msgstr ""
+
+#: includes/TTS/WordPressAITTSProvider.php:110
+msgid "O conector devolveu áudio vazio ou remoto (não suportado)."
+msgstr ""
+
+#: includes/TTS/WordPressAITTSProvider.php:135
+msgid "Um conector com conversão texto-fala está configurado no WordPress."
+msgstr ""
+
+#: includes/TTS/WordPressAITTSProvider.php:136
+msgid "Requer WordPress 7.0+ e um conector de IA com suporte a texto-fala."
+msgstr ""
+
+#: assets/js/block-editor.js:20
+msgid "Narrativa em áudio (Tainacan)"
+msgstr ""
+
+#: assets/js/block-editor.js:21
+msgid "Player da narrativa em áudio de um item Tainacan. Deixe o ID em 0 para usar o item da página atual."
+msgstr ""
+
+#: assets/js/block-editor.js:42
+msgid "ID do item Tainacan (0 = item atual)"
+msgstr ""
+
+#: assets/js/block-editor.js:51
+msgid "Título do player"
+msgstr ""
+
+#: assets/js/block-editor.js:58
+msgid "Mostrar “Ver texto”"
+msgstr ""
+
+#: assets/js/block-editor.js:69
+msgid "Narrativa em áudio do item atual (renderizada na página pública)."
+msgstr ""
