@@ -21,6 +21,20 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Uses wp_ai_client_prompt() and the connectors the site administrator already
  * configured in WordPress — no API key ever touches this plugin. Every call is
  * guarded because the builder API is still evolving between WP releases.
+ *
+ * IMPORTANT: WP_AI_Client_Prompt_Builder (the object wp_ai_client_prompt()
+ * returns) only exposes snake_case methods (using_system_instruction,
+ * generate_text_result, is_supported_for_text_generation…) via __call(); the
+ * underlying vendor SDK's camelCase names (usingSystemInstruction,
+ * generateTextResult…) also happen to resolve through __call() for *setters*
+ * because it proxies unknown methods verbatim, but the WordPress wrapper's
+ * exception→WP_Error safety net only recognizes the snake_case spelling of
+ * "generating" methods. Calling the camelCase generator name bypasses that
+ * safety net: on failure it silently returns the builder object itself
+ * instead of a WP_Error, which then blows up as soon as it is treated as a
+ * result (e.g. "Object of class WP_AI_Client_Prompt_Builder could not be
+ * converted to string"). Always use the snake_case names documented on that
+ * class, and always check is_wp_error() on what a generating method returns.
  */
 final class WordPressAIProvider implements AIProviderInterface {
 
@@ -56,7 +70,7 @@ final class WordPressAIProvider implements AIProviderInterface {
 		}
 		try {
 			$builder = wp_ai_client_prompt( 'test' );
-			return (bool) $builder->isSupportedForTextGeneration();
+			return (bool) $builder->is_supported_for_text_generation();
 		} catch ( \Throwable $e ) {
 			return false;
 		}
@@ -92,11 +106,27 @@ final class WordPressAIProvider implements AIProviderInterface {
 		}
 		try {
 			$builder = wp_ai_client_prompt( $user )
-				->usingSystemInstruction( $system )
-				->usingTemperature( (float) ( $options['temperature'] ?? Options::get( 'ai_temperature', 0.3 ) ) )
-				->usingMaxTokens( (int) ( $options['max_tokens'] ?? Options::get( 'ai_max_tokens', 2500 ) ) );
-			$result  = $builder->generateTextResult();
-			$text    = (string) $result->toText();
+				->using_system_instruction( $system )
+				->using_temperature( (float) ( $options['temperature'] ?? Options::get( 'ai_temperature', 0.3 ) ) )
+				->using_max_tokens( (int) ( $options['max_tokens'] ?? Options::get( 'ai_max_tokens', 2500 ) ) );
+			$result  = $builder->generate_text_result();
+		} catch ( \Throwable $e ) {
+			Logger::warning( 'WP AI client failure', array( 'error' => $e->getMessage() ) );
+			return new WP_Error( 'tn_ai_retryable', Logger::redact( $e->getMessage() ) );
+		}
+		// generate_text_result() reports failures as WP_Error, not exceptions.
+		if ( is_wp_error( $result ) ) {
+			Logger::warning(
+				'WP AI client error',
+				array(
+					'code'    => $result->get_error_code(),
+					'message' => $result->get_error_message(),
+				)
+			);
+			return new WP_Error( 'tn_ai_retryable', Logger::redact( $result->get_error_message() ) );
+		}
+		try {
+			$text = (string) $result->toText();
 		} catch ( \Throwable $e ) {
 			Logger::warning( 'WP AI client failure', array( 'error' => $e->getMessage() ) );
 			return new WP_Error( 'tn_ai_retryable', Logger::redact( $e->getMessage() ) );
