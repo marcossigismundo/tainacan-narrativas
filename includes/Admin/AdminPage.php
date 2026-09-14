@@ -135,6 +135,14 @@ class AdminPage extends \Tainacan\Pages {
 					'confirmDel'        => __( 'Excluir a narrativa e o áudio deste item? Esta ação não pode ser desfeita.', 'tainacan-narrativas' ),
 					'confirmAudio'      => __( 'Excluir o áudio gerado? O roteiro será mantido.', 'tainacan-narrativas' ),
 					'confirmApproveAll' => __( 'Aprovar todos os roteiros em revisão e gerar o áudio de cada um? Os roteiros ainda poderão ser editados depois.', 'tainacan-narrativas' ),
+					/* translators: %d: number of selected narratives. */
+					'confirmBulk'       => __( 'Excluir %d narrativa(s) selecionada(s), com todas as versões e áudios? Esta ação não pode ser desfeita.', 'tainacan-narrativas' ),
+					/* translators: %d: number of narratives matching the current filter. */
+					'confirmBulkAll'    => __( 'Excluir TODAS as %d narrativas que correspondem ao filtro atual (todas as páginas), com versões e áudios? Esta ação não pode ser desfeita.', 'tainacan-narrativas' ),
+					/* translators: %d: number of selected rows. */
+					'selected'          => __( '%d selecionada(s)', 'tainacan-narrativas' ),
+					/* translators: 1: items deleted, 2: versions deleted. */
+					'bulkDone'          => __( '%1$d narrativa(s) excluída(s) (%2$d versão(ões)).', 'tainacan-narrativas' ),
 					'saved'             => __( 'Roteiro salvo. Aprove para gerar o áudio.', 'tainacan-narrativas' ),
 					'noJobs'            => __( 'Fila vazia.', 'tainacan-narrativas' ),
 					'queueRun'          => /* translators: 1: done, 2: retry, 3: failed. */ __( 'Fila: %1$d concluído(s), %2$d reagendado(s), %3$d falha(s).', 'tainacan-narrativas' ),

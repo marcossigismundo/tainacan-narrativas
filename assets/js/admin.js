@@ -255,16 +255,77 @@
 		return cell;
 	}
 
+	/* ------------------------------------------------------------------ */
+	/* Bulk selection                                                      */
+	/* ------------------------------------------------------------------ */
+	var canSelect = !! ( table && table.getAttribute( 'data-tn-can-select' ) === '1' );
+	var lastTotal = 0;
+
+	function selectedIds() {
+		return Array.prototype.slice.call( document.querySelectorAll( '[data-tn-select]:checked' ) ).map( function ( c ) {
+			return parseInt( c.value, 10 );
+		} ).filter( function ( v ) { return v > 0; } );
+	}
+
+	function updateBulkBar() {
+		var bar = document.querySelector( '[data-tn-bulk]' );
+		if ( ! bar ) {
+			return;
+		}
+		var n = selectedIds().length;
+		var all = document.querySelector( '[data-tn-select-all]' );
+		var boxes = document.querySelectorAll( '[data-tn-select]' );
+		if ( all ) {
+			all.checked = boxes.length > 0 && n === boxes.length;
+			all.indeterminate = n > 0 && n < boxes.length;
+		}
+		bar.hidden = n === 0;
+		bar.querySelector( '[data-tn-bulk-count]' ).textContent = ( I.selected || '%d selecionada(s)' ).replace( '%d', n );
+		var allBtn = bar.querySelector( '.tn-bulk__all' );
+		if ( allBtn ) {
+			allBtn.hidden = ! ( lastTotal > boxes.length );
+			allBtn.textContent = 'Excluir todas do filtro atual (' + lastTotal + ')';
+		}
+	}
+
+	function bulkDelete( ids ) {
+		return api( { path: NS + '/narratives/bulk-delete', method: 'POST', data: { item_ids: ids } } );
+	}
+
+	function bulkDeleteFilter( onDone, totals ) {
+		var f = filters();
+		totals = totals || { items: 0, versions: 0 };
+		api( { path: NS + '/narratives/bulk-delete', method: 'POST', data: { all: true, status: f.status || '', collection_id: parseInt( f.collection_id || '0', 10 ) || 0 } } ).then( function ( r ) {
+			totals.items += r.items || 0;
+			totals.versions += r.versions || 0;
+			setQueueStatus( ( I.working || 'Processando…' ) + ' ' + totals.items + ' / restam ' + ( r.remaining || 0 ) );
+			if ( r.remaining > 0 && ( r.items > 0 || r.versions > 0 ) ) {
+				window.setTimeout( function () { bulkDeleteFilter( onDone, totals ); }, 150 );
+				return;
+			}
+			onDone( totals );
+		} ).catch( function ( e ) {
+			toast( errMsg( e ), 'error' );
+			onDone( totals );
+		} );
+	}
+
 	function renderRows( data ) {
 		var tbody = table.querySelector( '[data-tn-rows]' );
+		lastTotal = data.total || 0;
 		while ( tbody.firstChild ) {
 			tbody.removeChild( tbody.firstChild );
 		}
 		if ( ! data.rows.length ) {
-			tbody.appendChild( el( 'tr', {}, [ el( 'td', { colspan: '9', text: '—' } ) ] ) );
+			tbody.appendChild( el( 'tr', {}, [ el( 'td', { colspan: canSelect ? '10' : '9', text: '—' } ) ] ) );
 		}
 		data.rows.forEach( function ( row ) {
 			var tr = el( 'tr', { 'data-item-row': String( row.item_id ) } );
+			if ( canSelect ) {
+				var checkCell = el( 'td', { 'class': 'tn-col-check' } );
+				checkCell.appendChild( el( 'input', { type: 'checkbox', 'data-tn-select': '', value: String( row.item_id ), 'aria-label': 'Selecionar #' + row.item_id } ) );
+				tr.appendChild( checkCell );
+			}
 			var itemCell = el( 'td' );
 			itemCell.appendChild( el( 'a', { href: row.item_url || '#', target: '_blank', rel: 'noopener', text: row.item_title || ( '#' + row.item_id ) } ) );
 			itemCell.appendChild( el( 'span', { 'class': 'tn-muted', text: ' #' + row.item_id + ' · v' + row.version } ) );
@@ -745,6 +806,45 @@
 					loadList();
 				} ).catch( function ( e ) { toast( errMsg( e ), 'error' ); } );
 				break;
+			case 'bulk-clear':
+				document.querySelectorAll( '[data-tn-select]:checked' ).forEach( function ( c ) { c.checked = false; } );
+				updateBulkBar();
+				break;
+			case 'bulk-delete':
+				var bulkIds = selectedIds();
+				if ( ! bulkIds.length ) {
+					return;
+				}
+				if ( ! window.confirm( ( I.confirmBulk || 'Excluir %d narrativa(s)?' ).replace( '%d', bulkIds.length ) ) ) {
+					return;
+				}
+				setQueueStatus( I.working || 'Processando…' );
+				bulkDelete( bulkIds ).then( function ( r ) {
+					var msg = ( I.bulkDone || '%1$d narrativa(s) excluída(s) (%2$d versão(ões)).' ).replace( '%1$d', r.items ).replace( '%2$d', r.versions );
+					toast( msg, 'success' );
+					setQueueStatus( msg );
+					if ( bulkIds.indexOf( currentItem ) !== -1 && detail ) {
+						detail.hidden = true;
+					}
+					loadList();
+				} ).catch( function ( e ) { toast( errMsg( e ), 'error' ); setQueueStatus( '' ); } );
+				break;
+			case 'bulk-delete-filter':
+				if ( ! window.confirm( ( I.confirmBulkAll || 'Excluir TODAS as %d narrativas do filtro atual?' ).replace( '%d', lastTotal ) ) ) {
+					return;
+				}
+				setQueueStatus( I.working || 'Processando…' );
+				bulkDeleteFilter( function ( totals ) {
+					var msgAll = ( I.bulkDone || '%1$d narrativa(s) excluída(s) (%2$d versão(ões)).' ).replace( '%1$d', totals.items ).replace( '%2$d', totals.versions );
+					toast( msgAll, 'success' );
+					setQueueStatus( msgAll );
+					if ( detail ) {
+						detail.hidden = true;
+					}
+					state.page = 1;
+					loadList();
+				} );
+				break;
 			case 'delete':
 				if ( ! window.confirm( I.confirmDel || 'Excluir a narrativa?' ) ) {
 					return;
@@ -775,6 +875,20 @@
 			state.page = 1;
 			loadList();
 		} );
+	} );
+
+	// Row/select-all checkboxes (rows are re-rendered, so delegate on the document).
+	document.addEventListener( 'change', function ( ev ) {
+		var t = ev.target;
+		if ( ! t || ! t.matches ) {
+			return;
+		}
+		if ( t.matches( '[data-tn-select-all]' ) ) {
+			document.querySelectorAll( '[data-tn-select]' ).forEach( function ( c ) { c.checked = t.checked; } );
+			updateBulkBar();
+		} else if ( t.matches( '[data-tn-select]' ) ) {
+			updateBulkBar();
+		}
 	} );
 
 	initProviderSwitches();

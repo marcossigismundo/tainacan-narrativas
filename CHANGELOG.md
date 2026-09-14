@@ -2,6 +2,11 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/); versionamento semântico.
 
+## [1.2.1] — 2026-09-14
+
+### Adicionado
+- Exclusão em lote na aba Narrativas (capability `manage`): coluna de checkbox + "selecionar todas" (estado indeterminado quando parcial), barra de ações com "Excluir selecionadas", "Excluir todas do filtro atual (N)" quando o total supera a página (o JS repete `POST /narratives/bulk-delete {all, status, collection_id}` em lotes de 200 até `remaining` = 0) e "Limpar seleção". `NarrativeManager::delete_many()` / `delete_by_filter()`; rota `POST /narratives/bulk-delete` (ids explícitos ≤ 500 ou filtro).
+
 ## [1.2.0] — 2026-09-14
 
 Resposta ao relato de narrações com fatos que não estavam no item. Auditoria das

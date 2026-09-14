@@ -3,7 +3,7 @@
         'name' => 'marcossigismundo/tainacan-narrativas',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '9d8152cb385b5663732e99d427ad035d50a4ed70',
+        'reference' => 'a9e80ff4353f0ae803fae4c76fb56950e4ba64b7',
         'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -13,7 +13,7 @@
         'marcossigismundo/tainacan-narrativas' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '9d8152cb385b5663732e99d427ad035d50a4ed70',
+            'reference' => 'a9e80ff4353f0ae803fae4c76fb56950e4ba64b7',
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

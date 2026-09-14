@@ -4,7 +4,7 @@ Tags: tainacan, audio, acessibilidade, narrativa, text-to-speech
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 1.2.0
+Stable tag: 1.2.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -61,6 +61,9 @@ Somente título, descrição, nome da coleção, metadados públicos e o texto d
 No banco (mascaradas no painel, nunca enviadas ao navegador) ou, preferencialmente, em `wp-config.php` via `TN_AI_API_KEY`, `TN_GEMINI_API_KEY` e `TN_TTS_API_KEY`.
 
 == Changelog ==
+
+= 1.2.1 =
+* Exclusão em lote na aba Narrativas: checkbox por linha, "selecionar todas" no cabeçalho, botão "Excluir selecionadas" e "Excluir todas do filtro atual" (todas as páginas, em lotes de 200).
 
 = 1.2.0 =
 * Fidelidade: cada frase gerada pela IA é verificada contra as fontes do item (números, nomes próprios, ancoragem lexical); a IA recebe uma correção, o que continuar sem apoio é removido e, se sobrar pouco, o roteiro por template (fiel por construção) é usado. Relatório visível em Narrativas → Fontes e saúde e via REST.

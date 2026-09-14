@@ -285,3 +285,10 @@ span.tn-card { cursor: default; }
 .tn-faith ul { margin: 0 0 0 1.1rem; }
 .tn-faith li { margin: 0.2rem 0; }
 .tn-faith li em { color: var(--tn-danger); font-style: normal; font-weight: 600; }
+
+/* Bulk selection (Narratives tab) */
+.tn-col-check { width: 2rem; text-align: center; }
+.tn-col-check input { margin: 0; }
+.tn-bulk { display: flex; align-items: center; gap: var(--tn-sp-2); flex-wrap: wrap; margin: 0 0 var(--tn-sp-3); padding: var(--tn-sp-2) var(--tn-sp-3); border-radius: var(--tn-radius); background: var(--tn-warning-bg); border-left: 4px solid var(--tn-warning); font-size: var(--tn-fs-base); }
+.tn-bulk__count { font-weight: 700; margin-right: var(--tn-sp-2); }
+.tn-bulk .button-link { color: var(--tn-text-light); text-decoration: underline; cursor: pointer; background: none; border: 0; padding: 0; font-size: var(--tn-fs-sm); }

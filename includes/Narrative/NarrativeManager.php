@@ -629,6 +629,47 @@ final class NarrativeManager {
 	}
 
 	/**
+	 * Deletes every version (and audio) of several items.
+	 *
+	 * @param int[] $item_ids Item IDs.
+	 * @return array{items:int,versions:int}
+	 */
+	public function delete_many( array $item_ids ): array {
+		$items    = 0;
+		$versions = 0;
+		foreach ( array_unique( array_map( 'intval', $item_ids ) ) as $item_id ) {
+			if ( $item_id <= 0 ) {
+				continue;
+			}
+			$n = $this->delete_all( $item_id );
+			if ( $n > 0 ) {
+				++$items;
+				$versions += $n;
+			}
+		}
+		return array(
+			'items'    => $items,
+			'versions' => $versions,
+		);
+	}
+
+	/**
+	 * Deletes the narratives matching a listing filter, in bounded batches so
+	 * the caller (admin JS) can loop without hitting request limits.
+	 *
+	 * @param array<string,mixed> $filters status|collection_id.
+	 * @param int                 $limit   Max items per call.
+	 * @return array{items:int,versions:int,remaining:int}
+	 */
+	public function delete_by_filter( array $filters, int $limit = 200 ): array {
+		$page  = $this->repo->search( $filters, max( 1, min( 500, $limit ) ), 0 );
+		$ids   = array_map( static fn( array $row ): int => (int) $row['item_id'], $page['rows'] );
+		$done  = $this->delete_many( $ids );
+		$total = (int) $page['total'];
+		return array_merge( $done, array( 'remaining' => max( 0, $total - count( $ids ) ) ) );
+	}
+
+	/**
 	 * Re-computes the source hash and marks the narrative stale if it changed.
 	 *
 	 * @param int $item_id Item ID.

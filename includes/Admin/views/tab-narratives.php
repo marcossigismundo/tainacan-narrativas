@@ -54,10 +54,22 @@ $tn_collection_filter = isset( $_GET['collection'] ) ? absint( wp_unslash( $_GET
 		<span class="tn-toolbar__status" data-tn-queue-status></span>
 	</div>
 
+	<?php if ( $can_manage ) : ?>
+		<div class="tn-bulk" data-tn-bulk hidden>
+			<span class="tn-bulk__count" data-tn-bulk-count></span>
+			<button type="button" class="button" data-tn-action="bulk-delete"><?php esc_html_e( 'Excluir selecionadas', 'tainacan-narrativas' ); ?></button>
+			<button type="button" class="button tn-bulk__all" data-tn-action="bulk-delete-filter" hidden><?php esc_html_e( 'Excluir todas do filtro atual', 'tainacan-narrativas' ); ?></button>
+			<button type="button" class="button-link" data-tn-action="bulk-clear"><?php esc_html_e( 'Limpar seleção', 'tainacan-narrativas' ); ?></button>
+		</div>
+	<?php endif; ?>
+
 	<div class="tn-table-wrap">
-		<table class="widefat striped tn-table" data-tn-table>
+		<table class="widefat striped tn-table" data-tn-table data-tn-can-select="<?php echo $can_manage ? '1' : '0'; ?>">
 			<thead>
 				<tr>
+					<?php if ( $can_manage ) : ?>
+						<th class="tn-col-check"><input type="checkbox" data-tn-select-all aria-label="<?php esc_attr_e( 'Selecionar todas as narrativas desta página', 'tainacan-narrativas' ); ?>"></th>
+					<?php endif; ?>
 					<th><?php esc_html_e( 'Item', 'tainacan-narrativas' ); ?></th>
 					<th><?php esc_html_e( 'Coleção', 'tainacan-narrativas' ); ?></th>
 					<th><?php esc_html_e( 'Status', 'tainacan-narrativas' ); ?></th>
@@ -70,7 +82,7 @@ $tn_collection_filter = isset( $_GET['collection'] ) ? absint( wp_unslash( $_GET
 				</tr>
 			</thead>
 			<tbody data-tn-rows>
-				<tr><td colspan="9"><?php esc_html_e( 'Carregando…', 'tainacan-narrativas' ); ?></td></tr>
+				<tr><td colspan="10"><?php esc_html_e( 'Carregando…', 'tainacan-narrativas' ); ?></td></tr>
 			</tbody>
 		</table>
 	</div>

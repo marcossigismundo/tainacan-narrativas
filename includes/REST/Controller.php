@@ -39,6 +39,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *   GET  /items/{id}/preview  POST /items/{id}/generate|regenerate|check
  *   POST /collections/{id}/generate  POST /collections/generate-all  POST /queue/run
  *   POST /narratives/approve-all (review)  GET /coverage (review)
+ *   POST /narratives/bulk-delete (manage)
  * Manage capability:
  *   DELETE /items/{id}/audio  DELETE /items/{id}  POST /queue/clear-failed
  *   GET /providers  POST /providers/test  GET /diagnostics  POST /diagnostics/test-write|test-audio  GET /logs
@@ -352,6 +353,36 @@ final class Controller {
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'narratives_approve_all' ),
 				'permission_callback' => array( $this, 'can_review' ),
+			)
+		);
+		register_rest_route(
+			self::NS,
+			'/narratives/bulk-delete',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'narratives_bulk_delete' ),
+				'permission_callback' => array( $this, 'can_manage' ),
+				'args'                => array(
+					'item_ids'      => array(
+						'type'              => 'array',
+						'default'           => array(),
+						'items'             => array( 'type' => 'integer' ),
+						'sanitize_callback' => static fn( $v ) => array_values( array_filter( array_map( 'absint', (array) $v ) ) ),
+						'validate_callback' => static fn( $v ) => is_array( $v ) && count( $v ) <= 500,
+					),
+					'all'           => $bool,
+					'status'        => array(
+						'type'              => 'string',
+						'default'           => '',
+						'sanitize_callback' => 'sanitize_key',
+						'validate_callback' => static fn( $v ) => '' === $v || in_array( (string) $v, Repo::statuses(), true ),
+					),
+					'collection_id' => array(
+						'type'              => 'integer',
+						'default'           => 0,
+						'sanitize_callback' => 'absint',
+					),
+				),
 			)
 		);
 		register_rest_route(
@@ -849,6 +880,33 @@ final class Controller {
 				'counts' => $this->manager->jobs()->counts(),
 			)
 		);
+	}
+
+	/**
+	 * Bulk delete: explicit ids, or everything matching the listing filter
+	 * (one bounded batch per call; the client loops while `remaining` > 0).
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return mixed
+	 */
+	public function narratives_bulk_delete( WP_REST_Request $request ) {
+		if ( $request['all'] ) {
+			$result = $this->manager->delete_by_filter(
+				array(
+					'status'        => (string) $request['status'],
+					'collection_id' => (int) $request['collection_id'],
+				),
+				200
+			);
+		} else {
+			$ids = (array) $request['item_ids'];
+			if ( ! $ids ) {
+				return new WP_Error( 'tn_no_selection', __( 'Nenhuma narrativa selecionada.', 'tainacan-narrativas' ), array( 'status' => 400 ) );
+			}
+			$result              = $this->manager->delete_many( $ids );
+			$result['remaining'] = 0;
+		}
+		return rest_ensure_response( $result );
 	}
 
 	/**
