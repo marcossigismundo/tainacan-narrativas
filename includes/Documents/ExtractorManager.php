@@ -39,7 +39,7 @@ final class ExtractorManager {
 	/**
 	 * Bump when extractor behaviour changes to invalidate caches.
 	 */
-	public const EXTRACTOR_VERSION = '1';
+	public const EXTRACTOR_VERSION = '2';
 
 	/**
 	 * Registered extractors.

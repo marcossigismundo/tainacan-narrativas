@@ -26,6 +26,7 @@ final class Deactivator {
 	public static function deactivate(): void {
 		wp_clear_scheduled_hook( 'tn_process_queue' );
 		wp_clear_scheduled_hook( 'tn_stale_sweep' );
+		wp_clear_scheduled_hook( 'tn_coverage_sweep' );
 		wp_unschedule_hook( 'tn_check_item' );
 		delete_option( 'tn_queue_lock' );
 	}

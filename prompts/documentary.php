@@ -2,7 +2,7 @@
 /**
  * Mode: documentary narrative.
  *
- * Placeholders: {target_words} {title} {collection} {language} {sources}
+ * Placeholders: {target_words} {title} {collection} {language} {sources} {analysis}
  *
  * @package TainacanNarrativas
  */
@@ -14,14 +14,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 return implode(
 	"\n",
 	array(
-		'TAREFA: escreva uma narrativa documental sóbria sobre o registro "{title}", pertencente à coleção "{collection}", a partir exclusivamente das fontes abaixo.',
+		'TAREFA: escreva a narração em áudio do registro "{title}", da coleção "{collection}", a partir exclusivamente das fontes abaixo. Quem ouve não está vendo o documento: a narração precisa contar o que ele contém, com riqueza de detalhes, como um documentário de rádio conta uma história real.',
 		'',
-		'ESTILO: texto fluido e claro, tom informativo e respeitoso, como uma locução de acervo. Comece situando o que é o registro (tipo de documento e do que trata), depois apresente as informações documentais na ordem que fizer mais sentido para quem ouve, e termine com uma frase de encerramento breve que retome o título do registro.',
+		'COMO CONSTRUIR: abra com algo concreto do próprio documento (uma cena, uma pessoa, uma frase, um fato) e não com uma apresentação do registro. Situe, na sequência e de forma natural, o que é o documento, quem o produziu e quando e onde, sem rótulos. Depois conduza o ouvinte pelo conteúdo do documento inteiro, na ordem em que os fatos acontecem, com as passagens mais expressivas citadas literalmente e brevemente. Feche com um fato ou imagem do documento, sem síntese e sem moral.',
 		'',
-		'EXTENSÃO: aproximadamente {target_words} palavras. Se as fontes forem curtas, escreva menos; nunca preencha com conteúdo externo.',
+		'TOM: sóbrio, humano e próximo; informativo sem ser burocrático. Frases de tamanho variado, ritmo de fala.',
 		'',
-		'Inclua os metadados relevantes (autoria, datas, locais, instituições, assuntos) de forma natural na prosa, sem ler rótulos como "Autor:" ou "Data:".',
+		'EXTENSÃO: aproximadamente {target_words} palavras. Se as fontes forem curtas, escreva menos; nunca preencha com conteúdo externo, generalidades ou repetições.',
 		'',
+		'{analysis}',
 		'FONTES:',
 		'{sources}',
 	)

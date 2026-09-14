@@ -84,6 +84,13 @@ final class JobRunner {
 				$this->jobs->set_stage( (int) $job['id'], 'audio' );
 				$result = $this->manager->run( $item_id, array( 'audio_only' => true ) );
 				break;
+			case 'approve':
+				$this->jobs->set_stage( (int) $job['id'], 'audio' );
+				$result = $this->manager->approve( $item_id, (int) ( $payload['approved_by'] ?? 0 ) );
+				if ( is_wp_error( $result ) && 'tn_no_script' === $result->get_error_code() ) {
+					$result = array(); // Already handled by someone else: nothing to do.
+				}
+				break;
 			default:
 				$this->jobs->set_stage( (int) $job['id'], 'generate' );
 				$result = $this->manager->run(

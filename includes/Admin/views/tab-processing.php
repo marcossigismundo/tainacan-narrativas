@@ -42,14 +42,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<input type="hidden" name="action" value="tn_save_settings">
 	<input type="hidden" name="tn_tab" value="processing">
 	<input type="hidden" name="tn[__bools][]" value="cron_enabled">
+	<input type="hidden" name="tn[__bools][]" value="auto_coverage">
 	<fieldset <?php disabled( ! $can_manage ); ?>>
 		<div class="tn-panel">
 			<h2><?php esc_html_e( 'Gatilhos e limites', 'tainacan-narrativas' ); ?></h2>
+			<div class="tn-field tn-field--check">
+				<label><input type="checkbox" name="tn[auto_coverage]" value="1" <?php checked( ! empty( $settings['auto_coverage'] ) ); ?>> <strong><?php esc_html_e( 'Manter todas as coleções habilitadas cobertas automaticamente', 'tainacan-narrativas' ); ?></strong> <span class="tn-muted"><?php esc_html_e( '(varredura a cada hora: itens sem narrativa, desatualizados ou com erro entram na fila sozinhos)', 'tainacan-narrativas' ); ?></span></label>
+			</div>
+			<div class="tn-field-row">
+				<div class="tn-field"><label for="tn-coverage-batch"><?php esc_html_e( 'Itens enfileirados por varredura (a fila processa até "jobs por execução" por minuto)', 'tainacan-narrativas' ); ?></label><input type="number" id="tn-coverage-batch" name="tn[coverage_batch]" min="1" max="2000" value="<?php echo (int) ( $settings['coverage_batch'] ?? 150 ); ?>"></div>
+			</div>
 			<div class="tn-field">
 				<label for="tn-trigger"><?php esc_html_e( 'Ao salvar um item / documento / metadado', 'tainacan-narrativas' ); ?></label>
 				<select id="tn-trigger" name="tn[trigger_on_save]">
-					<option value="mark_stale" <?php selected( $settings['trigger_on_save'], 'mark_stale' ); ?>><?php esc_html_e( 'Recalcular hash e marcar como desatualizada (padrão)', 'tainacan-narrativas' ); ?></option>
-					<option value="queue" <?php selected( $settings['trigger_on_save'], 'queue' ); ?>><?php esc_html_e( 'Marcar como desatualizada e colocar regeneração na fila', 'tainacan-narrativas' ); ?></option>
+					<option value="queue" <?php selected( $settings['trigger_on_save'], 'queue' ); ?>><?php esc_html_e( 'Marcar como desatualizada e colocar regeneração na fila (padrão)', 'tainacan-narrativas' ); ?></option>
+					<option value="mark_stale" <?php selected( $settings['trigger_on_save'], 'mark_stale' ); ?>><?php esc_html_e( 'Apenas recalcular hash e marcar como desatualizada', 'tainacan-narrativas' ); ?></option>
 					<option value="none" <?php selected( $settings['trigger_on_save'], 'none' ); ?>><?php esc_html_e( 'Não fazer nada (somente manual / varredura diária)', 'tainacan-narrativas' ); ?></option>
 				</select>
 				<p class="description"><?php esc_html_e( 'A verificação roda 90 s depois, via WP-Cron, nunca dentro do save_post.', 'tainacan-narrativas' ); ?></p>

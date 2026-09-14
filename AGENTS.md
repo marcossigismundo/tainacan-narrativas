@@ -43,16 +43,87 @@ arquivo descreve **decisões, invariantes e como estender**.
 
 ```
 Core\Plugin (singleton; wiring no init prio 11, só com Tainacan ativo)
- ├─ Narrative\NarrativeManager  ← orquestra tudo (run/approve/save_script/check_stale/enqueue)
+ ├─ Narrative\NarrativeManager  ← orquestra tudo (run/approve/save_script/check_stale/enqueue/coverage)
  │    ├─ Tainacan\ContentCollector → Documents\ExtractorManager → extractors (+ cache em post meta do anexo)
- │    ├─ Narrative\SourceHasher / ContentScore / ScriptBuilder (template) / NarrativeGenerator (IA)
+ │    ├─ Narrative\SourceHasher / ContentScore
+ │    ├─ Narrative\ScriptBuilder (template) → ExtractiveSummarizer + MetadataPhraser
+ │    ├─ Narrative\NarrativeGenerator (IA: reduce → analyse → write → post_process)
+ │    ├─ Narrative\SpeechText (texto → fala: segmentação, normalização fonética, utterances)
  │    ├─ AI\ProviderManager (privacy gate por coleção) · TTS\ProviderManager (fallback browser)
  │    └─ Database\NarrativeRepository / JobRepository · TTS\AudioStorage (Media Library)
- ├─ Queue\QueueManager (cron) → Queue\JobRunner → NarrativeManager
+ ├─ Queue\QueueManager (cron: fila/min, check debounced, stale sweep diário, coverage sweep horário) → Queue\JobRunner → NarrativeManager
  ├─ Tainacan\ChangeListener (hooks → QueueManager::schedule_check)
  ├─ REST\Controller · Frontend\{Player,Shortcode,Block,Assets} · Admin\{AdminPage,SettingsHandler,Diagnostics}
  └─ CLI\Command
 ```
+
+### Camada de fala (v1.1.0) — por que existe e como funciona
+
+Reclamações reais que motivaram: voz "robótica", sílabas engolidas, frases
+cortadas no meio, siglas/datas lidas errado.
+
+- **`SpeechText`** (PHP puro) é a única fonte de verdade para o que é *falado*.
+  `segments($script)` devolve parágrafos → sentenças `{text, speech, parts}`:
+  `text` é o que aparece no transcript, `speech` é a versão para o motor de
+  voz (datas por extenso, "COVID-19" → "covid 19", "Dr." → "doutor", "SP"
+  maiúsculo → "São Paulo", romanos após século/nome, moeda, URLs removidas,
+  CAIXA ALTA rebaixada), `parts` são utterances ≤ 170 caracteres cortadas em
+  vírgulas/pontos. A view do player imprime `<span class="tn-sentence"
+  data-tn-speech data-tn-parts>`; o `player.js` só consome isso (fallback JS
+  simples quando o markup não tem spans, ex.: player de teste do admin).
+- Para TTS de servidor, `NarrativeManager::synthesize()` envia
+  `SpeechText::script_for_speech($script)`; `SourceHasher::audio_hash()`
+  inclui `SpeechText::VERSION` — **bumpe a constante** ao mudar a normalização
+  para que áudios existentes sejam refeitos.
+- **`player.js` é ES5 estrito** (sem lookbehind, sem arrow functions): um
+  `SyntaxError` de parse derruba o player inteiro em Safari < 16.4. Workarounds
+  do Chrome que não podem sair: `speak()` só ~120 ms depois de `cancel()`
+  (senão come as primeiras sílabas), `pause()/resume()` a cada 10 s em Chromium
+  desktop (senão a fala morre após ~15 s), referência ao utterance atual
+  (`this.utterance`, senão o GC mata o `onend`), `generation` para ignorar
+  callbacks de utterances canceladas.
+- **Escolha de voz**: `pickVoice()` pontua por idioma exato > família,
+  `browser_voice_hint` (nome), timbre (`browser_voice_gender`, padrão
+  `female`, listas `FEMALE_VOICES`/`MALE_VOICES`), marcadores de qualidade
+  (Natural/Online/Neural/Premium) e penaliza vozes legadas ("Desktop"). O
+  antigo critério "prefira `localService`" escolhia a Maria Desktop no Windows
+  — não voltar a ele.
+
+### Geração por IA (v1.1.0)
+
+`NarrativeGenerator::generate()`: (1) `reduce_long_texts` — chunks > `chunk_size`
+viram reduções fiéis (prompt `chunk-summary`, cache em transient) e são
+consolidadas; (2) `analyse` — prompt `analysis` produz um dossiê (tipo, quem,
+quando/onde, história completa, passagens literais, fio condutor) quando
+`ai_analysis` está ligado e as fontes têm ≥ 1200 caracteres (cache por hash);
+(3) prompt do modo recebe `{analysis}` + `{sources}`; (4) `post_process` remove
+markup, preâmbulos de chat, `<think>`, linha-título solta e aberturas de frase
+de "texto de máquina" (`MACHINE_OPENERS`). `max_tokens` por chamada =
+max(`ai_max_tokens`, palavras-alvo × 2,4 + 400). Os prompts pedem prosa oral
+com abertura concreta, cobertura do documento inteiro e citações literais
+breves, e proíbem títulos/listas/fórmulas de IA — ao editar prompts de forma
+que deva invalidar roteiros, bumpe `SourceHasher::PROMPT_VERSION`.
+
+Sem IA, `ScriptBuilder::build()` usa `ExtractiveSummarizer::summarize()` (TF
+logarítmico + nomes próprios + anos + números + citações + posição, dedupe de
+sentenças repetidas, ordem de leitura preservada) e `MetadataPhraser` (rótulo →
+frase: "Autoria" → "De autoria de X."). O modo `faithful` continua literal
+(`limit_words` + "Rótulo: valor.").
+
+### Cobertura automática (v1.1.0)
+
+`QueueManager::cron_coverage()` (hook `tn_coverage_sweep`, horário, opções
+`auto_coverage`/`coverage_batch`) chama
+`NarrativeManager::enqueue_pending_everywhere()`: para cada coleção habilitada
+enfileira itens sem narrativa/stale/error e, se a coleção tem IA utilizável,
+regenera com `force` os roteiros `ai_provider='template'` cujo `stats` contém
+`ai_fallback` (`NarrativeRepository::fallback_item_ids`). Só completa a fila
+até `coverage_batch` para não acumular. Botões no dashboard: "Gerar todas as
+narrativas pendentes" (`POST /collections/generate-all`) e "Aprovar todas em
+revisão" (`POST /narratives/approve-all` → jobs `action=approve`, tratados em
+`JobRunner`). Padrões de instalação nova: `editorial_flow=auto`,
+`trigger_on_save=queue`. O invariante "nunca gerar na requisição pública"
+continua valendo — cobertura acontece na fila.
 
 ### Decisões registradas (Fase 0 / 96)
 
@@ -116,7 +187,12 @@ Core\Plugin (singleton; wiring no init prio 11, só com Tainacan ativo)
   template e limite de caracteres; mudar só a voz não invalida o roteiro
   (`audio_hash` separado → só o áudio é refeito). Bumpe
   `SourceHasher::PROMPT_VERSION` ao mudar prompts de forma que deva invalidar
-  roteiros, e `ExtractorManager::EXTRACTOR_VERSION` ao mudar extratores.
+  roteiros, `ExtractorManager::EXTRACTOR_VERSION` ao mudar extratores e
+  `SpeechText::VERSION` ao mudar a normalização para fala (refaz áudios).
+- **Erros retryable** (`NarrativeManager::RETRYABLE`) incluem
+  `tn_ai_malformed`/`tn_ai_invalid_json`: uma resposta ruim do modelo é
+  reprocessada com backoff; só na última tentativa cai para o template (e fica
+  marcada em `stats.ai_fallback` para a cobertura regenerar depois).
 - **CollectionSettings::sanitize_entry()**: formulários HTML enviam
   `tnc[__form]=1` → checkbox ausente = 0; sem `__form` (wizard/CLI/filtros)
   chaves ausentes mantêm os defaults. Não remova o hidden input do
@@ -218,8 +294,14 @@ tinha o escopo `workflow`. Ative com `gh auth refresh -s workflow` e
 
 ## Pendências / próximos passos sugeridos
 
+- Ouvir no navegador (Chrome, Edge, Safari/iOS, Android) a v1.1.0 com itens
+  reais e ajustar `FEMALE_VOICES`/`QUALITY_MARKERS`/`MAX_UTTERANCE_CHARS` se
+  alguma plataforma ainda cortar ou escolher voz ruim; regenerar o `.pot`
+  (`wp i18n make-pot . languages/tainacan-narrativas.pot`) — strings novas da
+  1.1.0 ainda não estão nele.
 - Testar Kokoro-FastAPI e Piper reais (só foram testados os contratos HTTP e a
-  concatenação em unit tests) e um provedor OpenAI-compatible com modelo real.
+  concatenação em unit tests) e um provedor OpenAI-compatible com modelo real —
+  em especial a qualidade do dossiê (`analysis`) com modelos pequenos (Ollama).
 - Compartilhamento (link, QR, RSS/podcast por coleção) — fora do MVP.
 - Extrator para `.wacz` (texto das páginas capturadas) — fora do MVP.
 - Integração com os papéis do Tainacan na UI de roles (hoje: caps concedidas na

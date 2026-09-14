@@ -202,7 +202,7 @@ final class SettingsHandler {
 	public static function sanitize_settings( array $in, array &$errors ): array {
 		$out = array();
 
-		$bools = array( 'enabled', 'autoinject', 'cron_enabled', 'allow_download', 'provenance_notice', 'include_description', 'include_document', 'include_attachments', 'external_ai_attachments', 'allow_private_endpoints', 'debug', 'delete_on_uninstall', 'children_mode' );
+		$bools = array( 'enabled', 'autoinject', 'cron_enabled', 'auto_coverage', 'ai_analysis', 'allow_download', 'provenance_notice', 'include_description', 'include_document', 'include_attachments', 'external_ai_attachments', 'allow_private_endpoints', 'debug', 'delete_on_uninstall', 'children_mode' );
 		if ( isset( $in['__bools'] ) && is_array( $in['__bools'] ) ) {
 			foreach ( $in['__bools'] as $key ) {
 				$key = sanitize_key( (string) $key );
@@ -216,6 +216,7 @@ final class SettingsHandler {
 			'cron_batch'       => array( 1, 20 ),
 			'cron_time_budget' => array( 5, 120 ),
 			'max_attempts'     => array( 1, 10 ),
+			'coverage_batch'   => array( 1, 2000 ),
 			'keep_versions'    => array( 0, 50 ),
 			'max_attachments'  => array( 0, 50 ),
 			'max_chars_item'   => array( 1000, 500000 ),
@@ -234,6 +235,7 @@ final class SettingsHandler {
 			'ai_temperature' => array( 0.0, 2.0 ),
 			'tts_speed'      => array( 0.5, 2.0 ),
 			'browser_rate'   => array( 0.5, 2.0 ),
+			'browser_pitch'  => array( 0.5, 2.0 ),
 		);
 		foreach ( $floats as $key => $range ) {
 			if ( isset( $in[ $key ] ) && '' !== $in[ $key ] ) {
@@ -242,12 +244,13 @@ final class SettingsHandler {
 		}
 
 		$enums = array(
-			'trigger_on_save' => array( 'none', 'mark_stale', 'queue' ),
-			'editorial_flow'  => array( 'auto', 'review' ),
-			'ai_provider'     => array( 'none', 'openai_compatible', 'openai', 'ollama', 'gemini', 'wp_ai' ),
-			'tts_provider'    => array( 'browser', 'openai_compatible', 'piper_http', 'wp_ai' ),
-			'tts_format'      => array( 'mp3', 'wav' ),
-			'piper_payload'   => array( 'json', 'raw' ),
+			'trigger_on_save'      => array( 'none', 'mark_stale', 'queue' ),
+			'editorial_flow'       => array( 'auto', 'review' ),
+			'ai_provider'          => array( 'none', 'openai_compatible', 'openai', 'ollama', 'gemini', 'wp_ai' ),
+			'tts_provider'         => array( 'browser', 'openai_compatible', 'piper_http', 'wp_ai' ),
+			'tts_format'           => array( 'mp3', 'wav' ),
+			'piper_payload'        => array( 'json', 'raw' ),
+			'browser_voice_gender' => array( 'female', 'male', 'any' ),
 		);
 		foreach ( $enums as $key => $allowed ) {
 			if ( isset( $in[ $key ] ) ) {

@@ -1,7 +1,7 @@
 <?php
 /**
  * Intermediate step for large documents: merges chunk reductions into one
- * consolidated source before the mode prompt runs.
+ * consolidated source before the analysis/mode prompts run.
  *
  * Placeholders: {title} {sources}
  *
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 return implode(
 	"\n",
 	array(
-		'TAREFA: as fontes abaixo são reduções factuais de trechos consecutivos de um mesmo documento do registro "{title}". Consolide-as em um único texto contínuo e coerente, eliminando repetições e mantendo a ordem original, sem acrescentar nenhum fato que não esteja nelas e sem interpretar.',
+		'TAREFA: as fontes abaixo são reduções fiéis de trechos consecutivos de um mesmo documento do registro "{title}". Consolide-as em um único texto contínuo e coerente, mantendo a ordem original, eliminando repetições e preservando todos os nomes, datas, lugares, números, acontecimentos, detalhes concretos e as passagens literais entre aspas. Não acrescente nenhum fato que não esteja nelas e não interprete.',
 		'',
 		'Devolva apenas o texto consolidado.',
 		'',

@@ -33,7 +33,7 @@ $tn_secret_field = static function ( string $key, string $label ): void {
 	<?php wp_nonce_field( 'tn_settings' ); ?>
 	<input type="hidden" name="action" value="tn_save_settings">
 	<input type="hidden" name="tn_tab" value="ai">
-	<?php foreach ( array( 'external_ai_attachments', 'allow_private_endpoints', 'children_mode' ) as $tn_b ) : ?>
+	<?php foreach ( array( 'external_ai_attachments', 'allow_private_endpoints', 'children_mode', 'ai_analysis' ) as $tn_b ) : ?>
 		<input type="hidden" name="tn[__bools][]" value="<?php echo esc_attr( $tn_b ); ?>">
 	<?php endforeach; ?>
 	<fieldset <?php disabled( ! $can_manage ); ?>>
@@ -95,6 +95,7 @@ $tn_secret_field = static function ( string $key, string $label ): void {
 				<div class="tn-field"><label for="tn-chunk"><?php esc_html_e( 'Tamanho do chunk (caracteres)', 'tainacan-narrativas' ); ?></label><input type="number" id="tn-chunk" name="tn[chunk_size]" min="1500" max="30000" step="500" value="<?php echo (int) $settings['chunk_size']; ?>"></div>
 			</div>
 			<div class="tn-field tn-field--check">
+				<label><input type="checkbox" name="tn[ai_analysis]" value="1" <?php checked( ! empty( $settings['ai_analysis'] ) ); ?>> <strong><?php esc_html_e( 'Leitura prévia do documento (recomendado)', 'tainacan-narrativas' ); ?></strong> <span class="tn-muted"><?php esc_html_e( '— antes de escrever, a IA lê o PDF inteiro e monta um dossiê (pessoas, datas, cronologia, passagens literais, fio condutor); a narrativa sai mais rica e cobre o documento todo. Custa uma chamada a mais por item.', 'tainacan-narrativas' ); ?></span></label>
 				<label><input type="checkbox" name="tn[external_ai_attachments]" value="1" <?php checked( ! empty( $settings['external_ai_attachments'] ) ); ?>> <?php esc_html_e( 'Enviar texto dos anexos a IA externa (pode ser desativado por coleção)', 'tainacan-narrativas' ); ?></label>
 				<label><input type="checkbox" name="tn[allow_private_endpoints]" value="1" <?php checked( ! empty( $settings['allow_private_endpoints'] ) ); ?>> <?php esc_html_e( 'Permitir endpoints de rede privada/local (necessário para Ollama, LM Studio, Kokoro e Piper no mesmo servidor). Redirecionamentos ficam desabilitados.', 'tainacan-narrativas' ); ?></label>
 				<label><input type="checkbox" name="tn[children_mode]" value="1" <?php checked( ! empty( $settings['children_mode'] ) ); ?>> <?php esc_html_e( 'Habilitar o modo "Público infantil" (nunca infantiliza temas sensíveis)', 'tainacan-narrativas' ); ?></label>
@@ -114,7 +115,8 @@ $tn_secret_field = static function ( string $key, string $label ): void {
 				<li><?php esc_html_e( 'Título, descrição, nome da coleção e metadados PÚBLICOS com valor (privados nunca).', 'tainacan-narrativas' ); ?></li>
 				<li><?php esc_html_e( 'Texto extraído do documento principal e, se permitido, dos anexos — delimitado como fonte não confiável (instruções dentro dos documentos são ignoradas).', 'tainacan-narrativas' ); ?></li>
 				<li><?php esc_html_e( 'Nunca: IDs internos desnecessários, usuários, e-mails, logs, tokens ou dados administrativos.', 'tainacan-narrativas' ); ?></li>
-				<li><?php esc_html_e( 'Documentos grandes são reduzidos por trechos (resumo factual por chunk → consolidação) antes do roteiro; reduções são cacheadas por hash.', 'tainacan-narrativas' ); ?></li>
+				<li><?php esc_html_e( 'Documentos grandes são reduzidos por trechos (redução fiel por chunk → consolidação) antes do roteiro; reduções e dossiês são cacheados por hash.', 'tainacan-narrativas' ); ?></li>
+				<li><?php esc_html_e( 'Etapas por item: redução (se o documento for longo) → leitura prévia (dossiê) → escrita da narração → limpeza determinística (markdown, fórmulas de texto automático). Tudo na fila, nunca na visita do público.', 'tainacan-narrativas' ); ?></li>
 			</ul>
 		</div>
 	</fieldset>

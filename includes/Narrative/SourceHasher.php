@@ -29,7 +29,7 @@ final class SourceHasher {
 	/**
 	 * Bump when prompts/templates change in a way that should invalidate scripts.
 	 */
-	public const PROMPT_VERSION = '1';
+	public const PROMPT_VERSION = '2';
 
 	/**
 	 * Source hash.
@@ -81,7 +81,7 @@ final class SourceHasher {
 	 * @return string
 	 */
 	public static function audio_hash( string $script_hash, string $provider, string $voice, float $speed, string $format ): string {
-		return hash( 'sha256', implode( '|', array( $script_hash, $provider, $voice, (string) $speed, $format ) ) );
+		return hash( 'sha256', implode( '|', array( $script_hash, $provider, $voice, (string) $speed, $format, 'speech:' . SpeechText::VERSION ) ) );
 	}
 
 	/**

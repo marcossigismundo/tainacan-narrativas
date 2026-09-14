@@ -9,7 +9,7 @@
  * @var array<string,mixed> $config     JS config.
  * @var array<string,mixed> $args       title|show_transcript.
  * @var string              $mode_label Mode label.
- * @var string[]            $paragraphs Transcript paragraphs.
+ * @var array<int,array<int,array{text:string,speech:string,parts:string[]}>> $segments Transcript sentences per paragraph.
  * @var string              $duration   Formatted duration.
  *
  * @package TainacanNarrativas
@@ -54,10 +54,12 @@ $tn_uid = 'tn-player-' . (int) $item_id;
 		<details class="tn-player__transcript" data-tn-transcript>
 			<summary class="tn-player__transcript-toggle"><?php esc_html_e( 'Ver texto', 'tainacan-narrativas' ); ?></summary>
 			<div class="tn-player__transcript-body" data-tn-transcript-body>
-				<?php foreach ( $paragraphs as $tn_paragraph ) : ?>
-					<?php if ( '' !== trim( $tn_paragraph ) ) : ?>
-						<p><?php echo esc_html( $tn_paragraph ); ?></p>
-					<?php endif; ?>
+				<?php foreach ( $segments as $tn_sentences ) : ?>
+					<p>
+						<?php foreach ( $tn_sentences as $tn_i => $tn_sentence ) : ?>
+							<span class="tn-sentence"<?php echo $tn_sentence['speech'] !== $tn_sentence['text'] ? ' data-tn-speech="' . esc_attr( $tn_sentence['speech'] ) . '"' : ''; ?><?php echo count( $tn_sentence['parts'] ) > 1 ? ' data-tn-parts="' . esc_attr( (string) wp_json_encode( $tn_sentence['parts'], JSON_UNESCAPED_UNICODE ) ) . '"' : ''; ?>><?php echo esc_html( $tn_sentence['text'] ); ?></span><?php echo $tn_i < count( $tn_sentences ) - 1 ? ' ' : ''; ?>
+						<?php endforeach; ?>
+					</p>
 				<?php endforeach; ?>
 			</div>
 		</details>

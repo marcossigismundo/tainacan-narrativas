@@ -37,7 +37,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  *   GET  /narratives  /stats  /jobs
  * Generate capability:
  *   GET  /items/{id}/preview  POST /items/{id}/generate|regenerate|check
- *   POST /collections/{id}/generate  POST /queue/run
+ *   POST /collections/{id}/generate  POST /collections/generate-all  POST /queue/run
+ *   POST /narratives/approve-all (review)  GET /coverage (review)
  * Manage capability:
  *   DELETE /items/{id}/audio  DELETE /items/{id}  POST /queue/clear-failed
  *   GET /providers  POST /providers/test  GET /diagnostics  POST /diagnostics/test-write|test-audio  GET /logs
@@ -313,6 +314,41 @@ final class Controller {
 					'only_pending' => array_merge( $bool, array( 'default' => true ) ),
 					'force'        => $bool,
 				),
+			)
+		);
+
+		register_rest_route(
+			self::NS,
+			'/collections/generate-all',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'collections_generate_all' ),
+				'permission_callback' => array( $this, 'can_generate' ),
+				'args'                => array(
+					'limit' => array(
+						'type'              => 'integer',
+						'default'           => 0,
+						'sanitize_callback' => 'absint',
+					),
+				),
+			)
+		);
+		register_rest_route(
+			self::NS,
+			'/narratives/approve-all',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'narratives_approve_all' ),
+				'permission_callback' => array( $this, 'can_review' ),
+			)
+		);
+		register_rest_route(
+			self::NS,
+			'/coverage',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'coverage' ),
+				'permission_callback' => array( $this, 'can_review' ),
 			)
 		);
 
@@ -740,6 +776,41 @@ final class Controller {
 				'counts' => $this->manager->jobs()->counts(),
 			)
 		);
+	}
+
+	/**
+	 * Bulk enqueue of pending items across every enabled collection.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return mixed
+	 */
+	public function collections_generate_all( WP_REST_Request $request ) {
+		$result = $this->manager->enqueue_pending_everywhere( (int) $request['limit'] );
+		return rest_ensure_response( array_merge( $result, array( 'counts' => $this->manager->jobs()->counts() ) ) );
+	}
+
+	/**
+	 * Queues approval for every narrative waiting for review.
+	 *
+	 * @return mixed
+	 */
+	public function narratives_approve_all() {
+		$n = $this->manager->approve_all_pending( get_current_user_id() );
+		return rest_ensure_response(
+			array(
+				'queued' => $n,
+				'counts' => $this->manager->jobs()->counts(),
+			)
+		);
+	}
+
+	/**
+	 * Coverage per collection.
+	 *
+	 * @return mixed
+	 */
+	public function coverage() {
+		return rest_ensure_response( array( 'collections' => $this->manager->coverage() ) );
 	}
 
 	/**

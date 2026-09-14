@@ -44,9 +44,10 @@ $tn_template = '' !== trim( (string) $settings['template_script'] ) ? (string) $
 				<div class="tn-field">
 					<label for="tn-flow"><?php esc_html_e( 'Fluxo editorial padrão', 'tainacan-narrativas' ); ?></label>
 					<select id="tn-flow" name="tn[editorial_flow]">
-						<option value="review" <?php selected( $settings['editorial_flow'], 'review' ); ?>><?php esc_html_e( 'B — IA → roteiro pendente → revisor → aprovação → TTS (recomendado para acervos históricos)', 'tainacan-narrativas' ); ?></option>
-						<option value="auto" <?php selected( $settings['editorial_flow'], 'auto' ); ?>><?php esc_html_e( 'A — IA → áudio automaticamente', 'tainacan-narrativas' ); ?></option>
+						<option value="auto" <?php selected( $settings['editorial_flow'], 'auto' ); ?>><?php esc_html_e( 'Automático — cada item fica com narrativa pronta sem intervenção (padrão); o roteiro pode ser editado depois', 'tainacan-narrativas' ); ?></option>
+						<option value="review" <?php selected( $settings['editorial_flow'], 'review' ); ?>><?php esc_html_e( 'Revisão humana — o roteiro fica pendente até um revisor aprovar', 'tainacan-narrativas' ); ?></option>
 					</select>
+					<p class="description"><?php esc_html_e( 'Em ambos os fluxos nada é gerado na visita do público: IA e voz rodam na fila e o resultado fica armazenado.', 'tainacan-narrativas' ); ?></p>
 				</div>
 				<div class="tn-field">
 					<label for="tn-lang"><?php esc_html_e( 'Idioma das narrativas', 'tainacan-narrativas' ); ?></label>

@@ -52,6 +52,9 @@ final class Activator {
 		if ( ! wp_next_scheduled( 'tn_stale_sweep' ) ) {
 			wp_schedule_event( time() + HOUR_IN_SECONDS, 'daily', 'tn_stale_sweep' );
 		}
+		if ( ! wp_next_scheduled( 'tn_coverage_sweep' ) ) {
+			wp_schedule_event( time() + 5 * MINUTE_IN_SECONDS, 'hourly', 'tn_coverage_sweep' );
+		}
 
 		set_transient( 'tn_activation_redirect', 1, 60 );
 	}

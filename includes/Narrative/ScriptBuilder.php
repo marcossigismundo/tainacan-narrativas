@@ -19,7 +19,11 @@ if ( ! defined( 'ABSPATH' ) ) {
  *  - build(): the "documentary reading" script (title + description +
  *    metadata + document + attachments) using a configurable template. This
  *    is what plays when no AI is configured, and the base for the "faithful"
- *    mode.
+ *    mode. Long documents are condensed by an extractive summarizer that
+ *    keeps the salient sentences in reading order (names, dates, places,
+ *    numbers, quotes) instead of cutting the text after N words; metadata
+ *    are phrased as sentences instead of "Label: value" (except in the
+ *    faithful mode, which reads them as they are).
  *  - sources_block(): the SOURCE-delimited corpus handed to AI providers,
  *    so every sentence of a generated narrative is traceable to a source id.
  */
@@ -62,16 +66,25 @@ final class ScriptBuilder {
 	public function build( array $corpus, string $mode, string $template = '' ): string {
 		$def          = Modes::get( $mode );
 		$target_words = (int) ( $def['target_words'] ?? 0 );
+		$faithful     = 'faithful' === $mode;
 		$template     = '' !== trim( $template ) ? $template : self::default_template();
 
-		$doc_text  = trim( (string) ( $corpus['document']['text'] ?? '' ) );
-		$truncated = false;
-		if ( $target_words > 0 && '' !== $doc_text ) {
-			$doc_text = $this->limit_words( $doc_text, $target_words, $truncated );
+		$description = trim( (string) ( $corpus['description'] ?? '' ) );
+		$doc_text    = trim( (string) ( $corpus['document']['text'] ?? '' ) );
+		$truncated   = false;
+
+		// Budget: the document gets what is left after description and metadata.
+		$doc_budget = $target_words;
+		if ( $target_words > 0 ) {
+			$doc_budget = max( 120, $target_words - Normalizer::word_count( $description ) - 40 );
+		}
+		if ( $doc_budget > 0 && '' !== $doc_text && Normalizer::word_count( $doc_text ) > $doc_budget ) {
+			$doc_text  = $faithful ? $this->limit_words( $doc_text, $doc_budget ) : ExtractiveSummarizer::summarize( $doc_text, $doc_budget );
+			$truncated = true;
 		}
 
 		$attachments = array();
-		$remaining   = $target_words > 0 ? max( 0, $target_words - Normalizer::word_count( $doc_text ) ) : 0;
+		$remaining   = $target_words > 0 ? max( 0, $target_words - Normalizer::word_count( $doc_text ) - Normalizer::word_count( $description ) ) : 0;
 		foreach ( (array) ( $corpus['attachments'] ?? array() ) as $i => $att ) {
 			$text = trim( (string) ( $att['text'] ?? '' ) );
 			if ( '' === $text ) {
@@ -82,7 +95,10 @@ final class ScriptBuilder {
 					$truncated = true;
 					break;
 				}
-				$text       = $this->limit_words( $text, $remaining, $truncated );
+				if ( Normalizer::word_count( $text ) > $remaining ) {
+					$text      = $faithful ? $this->limit_words( $text, $remaining ) : ExtractiveSummarizer::summarize( $text, $remaining );
+					$truncated = true;
+				}
 				$remaining -= Normalizer::word_count( $text );
 			}
 			$name = (string) ( $att['filename'] ?? '' );
@@ -93,9 +109,9 @@ final class ScriptBuilder {
 		$vars = array(
 			'title'          => (string) ( $corpus['title'] ?? '' ),
 			'collection'     => (string) ( $corpus['collection_name'] ?? '' ),
-			'description'    => (string) ( $corpus['description'] ?? '' ),
-			'metadata'       => $this->metadata_sentences( $corpus ),
-			'document_intro' => '' !== $doc_text ? __( 'A documentação associada ao item registra o seguinte:', 'tainacan-narrativas' ) : '',
+			'description'    => $description,
+			'metadata'       => $faithful ? $this->metadata_sentences( $corpus ) : $this->metadata_prose( $corpus ),
+			'document_intro' => '' !== $doc_text ? ( $truncated && ! $faithful ? __( 'Dos documentos que acompanham este registro, destacam-se as seguintes passagens:', 'tainacan-narrativas' ) : __( 'A documentação associada ao item registra o seguinte:', 'tainacan-narrativas' ) ) : '',
 			'document'       => $doc_text,
 			'attachments'    => implode( "\n\n", $attachments ),
 			'closing'        => $truncated ? __( 'Este registro contém mais informações do que as narradas aqui. Consulte a página do item para o conteúdo completo.', 'tainacan-narrativas' ) : '',
@@ -117,13 +133,11 @@ final class ScriptBuilder {
 			}
 			$out[] = PromptLoader::fill( $line, $vars );
 		}
-		$script = Normalizer::clean( implode( "\n", $out ) );
-
-		return $script;
+		return Normalizer::clean( implode( "\n", $out ) );
 	}
 
 	/**
-	 * "Label: value." sentences for the metadata.
+	 * "Label: value." sentences for the metadata (faithful reading).
 	 *
 	 * @param array<string,mixed> $corpus Corpus.
 	 * @return string
@@ -138,6 +152,23 @@ final class ScriptBuilder {
 			}
 			$value   = rtrim( $value, '.;,' );
 			$lines[] = $label . ': ' . $value . '.';
+		}
+		return implode( "\n", $lines );
+	}
+
+	/**
+	 * Metadata phrased as spoken sentences (documentary reading).
+	 *
+	 * @param array<string,mixed> $corpus Corpus.
+	 * @return string
+	 */
+	public function metadata_prose( array $corpus ): string {
+		$lines = array();
+		foreach ( (array) ( $corpus['metadata'] ?? array() ) as $m ) {
+			$sentence = MetadataPhraser::sentence( (string) ( $m['label'] ?? '' ), (string) ( $m['value'] ?? '' ), (string) ( $m['type'] ?? '' ) );
+			if ( '' !== $sentence ) {
+				$lines[] = $sentence;
+			}
 		}
 		return implode( "\n", $lines );
 	}
@@ -188,14 +219,13 @@ final class ScriptBuilder {
 	}
 
 	/**
-	 * Cuts text to ~N words at a sentence boundary.
+	 * Cuts text to ~N words at a sentence boundary (faithful mode only).
 	 *
-	 * @param string $text      Text.
-	 * @param int    $words     Target words.
-	 * @param bool   $truncated Set to true when cut (by ref).
+	 * @param string $text  Text.
+	 * @param int    $words Target words.
 	 * @return string
 	 */
-	private function limit_words( string $text, int $words, bool &$truncated ): string {
+	private function limit_words( string $text, int $words ): string {
 		if ( $words <= 0 || Normalizer::word_count( $text ) <= $words ) {
 			return $text;
 		}
@@ -212,7 +242,6 @@ final class ScriptBuilder {
 				break;
 			}
 		}
-		$truncated = true;
 		return implode( ' ', $out );
 	}
 

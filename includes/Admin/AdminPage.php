@@ -128,18 +128,19 @@ class AdminPage extends \Tainacan\Pages {
 				'statusLabels'  => Repo::status_labels(),
 				'modeLabels'    => Modes::labels(),
 				'i18n'          => array(
-					'working'      => __( 'Processando…', 'tainacan-narrativas' ),
-					'queued'       => __( 'Enfileirado. Executando a fila…', 'tainacan-narrativas' ),
-					'done'         => __( 'Concluído.', 'tainacan-narrativas' ),
-					'error'        => __( 'Erro', 'tainacan-narrativas' ),
-					'confirmDel'   => __( 'Excluir a narrativa e o áudio deste item? Esta ação não pode ser desfeita.', 'tainacan-narrativas' ),
-					'confirmAudio' => __( 'Excluir o áudio gerado? O roteiro será mantido.', 'tainacan-narrativas' ),
-					'saved'        => __( 'Roteiro salvo. Aprove para gerar o áudio.', 'tainacan-narrativas' ),
-					'noJobs'       => __( 'Fila vazia.', 'tainacan-narrativas' ),
-					'queueRun'     => /* translators: 1: done, 2: retry, 3: failed. */ __( 'Fila: %1$d concluído(s), %2$d reagendado(s), %3$d falha(s).', 'tainacan-narrativas' ),
-					'testing'      => __( 'Testando…', 'tainacan-narrativas' ),
-					'copyOk'       => __( 'Copiado.', 'tainacan-narrativas' ),
-					'sourcesTitle' => __( 'Fontes que entrarão na narrativa', 'tainacan-narrativas' ),
+					'working'           => __( 'Processando…', 'tainacan-narrativas' ),
+					'queued'            => __( 'Enfileirado. Executando a fila…', 'tainacan-narrativas' ),
+					'done'              => __( 'Concluído.', 'tainacan-narrativas' ),
+					'error'             => __( 'Erro', 'tainacan-narrativas' ),
+					'confirmDel'        => __( 'Excluir a narrativa e o áudio deste item? Esta ação não pode ser desfeita.', 'tainacan-narrativas' ),
+					'confirmAudio'      => __( 'Excluir o áudio gerado? O roteiro será mantido.', 'tainacan-narrativas' ),
+					'confirmApproveAll' => __( 'Aprovar todos os roteiros em revisão e gerar o áudio de cada um? Os roteiros ainda poderão ser editados depois.', 'tainacan-narrativas' ),
+					'saved'             => __( 'Roteiro salvo. Aprove para gerar o áudio.', 'tainacan-narrativas' ),
+					'noJobs'            => __( 'Fila vazia.', 'tainacan-narrativas' ),
+					'queueRun'          => /* translators: 1: done, 2: retry, 3: failed. */ __( 'Fila: %1$d concluído(s), %2$d reagendado(s), %3$d falha(s).', 'tainacan-narrativas' ),
+					'testing'           => __( 'Testando…', 'tainacan-narrativas' ),
+					'copyOk'            => __( 'Copiado.', 'tainacan-narrativas' ),
+					'sourcesTitle'      => __( 'Fontes que entrarão na narrativa', 'tainacan-narrativas' ),
 				),
 			)
 		);
@@ -214,6 +215,7 @@ class AdminPage extends \Tainacan\Pages {
 			}
 		}
 		$diagnostics     = 'diagnostics' === $tab ? ( new Diagnostics( $manager ) )->run() : array();
+		$coverage        = 'dashboard' === $tab ? $manager->coverage() : array();
 		$providers_state = array();
 		if ( in_array( $tab, array( 'ai', 'voice', 'wizard' ), true ) ) {
 			foreach ( $manager->ai()->all() as $id => $p ) {

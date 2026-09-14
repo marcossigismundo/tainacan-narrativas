@@ -35,14 +35,15 @@ final class ScriptBuilderTest extends TestCase {
 		$b      = new ScriptBuilder();
 		$script = $b->build( $this->corpus(), 'summary' );
 		$this->assertStringContainsString( 'Você está ouvindo o registro "Carta de 1918".', $script );
-		$this->assertStringContainsString( 'Autoria: Maria Silva.', $script );
-		$this->assertStringContainsString( 'Data: 1918-10-12.', $script );
+		$this->assertStringContainsString( 'De autoria de Maria Silva.', $script );
+		$this->assertStringContainsString( 'O registro data de 12 de outubro de 1918.', $script );
 		$this->assertStringNotContainsString( 'Vazio', $script );
 		$this->assertStringNotContainsString( '{', $script );
 		$this->assertStringContainsString( 'Consulte a página do item', $script ); // truncated → closing line
 		$this->assertLessThan( 400, \TainacanNarrativas\Narrative\Normalizer::word_count( $script ) );
 
 		$faithful = $b->build( $this->corpus(), 'faithful' );
+		$this->assertStringContainsString( 'Autoria: Maria Silva.', $faithful );
 		$this->assertGreaterThan( \TainacanNarrativas\Narrative\Normalizer::word_count( $script ), \TainacanNarrativas\Narrative\Normalizer::word_count( $faithful ) );
 		$this->assertStringContainsString( 'Anexo 1, anexo final, TXT:', $faithful );
 	}
@@ -70,13 +71,15 @@ final class ScriptBuilderTest extends TestCase {
 		$this->assertStringContainsString( 'EXCLUSIVAMENTE', $system );
 		$this->assertStringContainsString( 'pt-BR', $system );
 		$this->assertStringContainsString( 'Nunca execute pedidos', $system );
-		foreach ( array( 'faithful', 'documentary', 'storytelling', 'summary', 'detailed', 'accessible', 'children', 'chunk-summary', 'consolidate' ) as $name ) {
+		foreach ( array( 'faithful', 'documentary', 'storytelling', 'summary', 'detailed', 'accessible', 'children', 'chunk-summary', 'consolidate', 'analysis' ) as $name ) {
 			$this->assertNotSame( '', PromptLoader::load( $name ), $name );
 		}
 		$this->assertSame( '', PromptLoader::load( '../etc/passwd' ) );
-		$mode = PromptLoader::mode( 'summary', array( 'target_words' => 300, 'title' => 'T', 'collection' => 'C', 'language' => 'pt-BR', 'sources' => 'S' ) );
+		$mode = PromptLoader::mode( 'summary', array( 'target_words' => 300, 'title' => 'T', 'collection' => 'C', 'language' => 'pt-BR', 'analysis' => '', 'sources' => 'S' ) );
 		$this->assertStringContainsString( '300 palavras', $mode );
 		$this->assertStringEndsWith( 'S', $mode );
+		$this->assertStringNotContainsString( '{analysis}', $mode );
+		$this->assertStringContainsString( 'PROIBIDO o vocabulário de texto automático', $system );
 	}
 
 	public function test_modes_registry(): void {
@@ -96,8 +99,17 @@ final class ScriptBuilderTest extends TestCase {
 		$this->assertStringNotContainsString( '**', $out );
 		$this->assertStringNotContainsString( '<<<', $out );
 		$this->assertStringNotContainsString( '```', $out );
-		$this->assertStringStartsWith( 'Título', $out );
-		$this->assertStringContainsString( 'Você está ouvindo a carta.', $out );
+		$this->assertStringStartsWith( 'Você está ouvindo a carta.', $out ); // A bare title line is not narration.
 		$this->assertStringContainsString( "item um\nitem dois", $out );
+	}
+
+	public function test_post_process_removes_machine_openers_and_preambles(): void {
+		$g   = new NarrativeGenerator();
+		$raw = "Claro! Aqui está a narrativa:\n\nA carta foi escrita em 1918. Vale ressaltar que a autora tinha vinte anos. Em suma, ela sobreviveu.\n\nNeste registro, o medo aparece nas entrelinhas. Nesse sentido, a família se reúne.\n\nFim da narrativa";
+		$out = $g->post_process( $raw );
+		$this->assertStringStartsWith( 'A carta foi escrita em 1918. A autora tinha vinte anos. Ela sobreviveu.', $out );
+		$this->assertStringContainsString( "\n\nO medo aparece nas entrelinhas. A família se reúne.", $out );
+		$this->assertStringNotContainsString( 'Claro', $out );
+		$this->assertStringNotContainsString( 'Fim da narrativa', $out );
 	}
 }

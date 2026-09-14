@@ -43,7 +43,7 @@ final class NarrativeManager {
 	 *
 	 * @var string[]
 	 */
-	public const RETRYABLE = array( 'tn_ai_retryable', 'tn_locked', 'tn_tts_retryable' );
+	public const RETRYABLE = array( 'tn_ai_retryable', 'tn_ai_malformed', 'tn_ai_invalid_json', 'tn_locked', 'tn_tts_retryable' );
 
 	/**
 	 * Narratives repository.
@@ -292,9 +292,11 @@ final class NarrativeManager {
 					: __( 'Narrativa produzida a partir das informações deste registro.', 'tainacan-narrativas' ) )
 				: '',
 			'browser'        => array(
-				'lang'  => (string) Options::get( 'browser_lang', 'pt-BR' ),
-				'voice' => (string) Options::get( 'browser_voice_hint', '' ),
-				'rate'  => (float) Options::get( 'browser_rate', 1.0 ),
+				'lang'   => (string) Options::get( 'browser_lang', 'pt-BR' ),
+				'voice'  => (string) Options::get( 'browser_voice_hint', '' ),
+				'gender' => (string) Options::get( 'browser_voice_gender', 'female' ),
+				'rate'   => (float) Options::get( 'browser_rate', 1.0 ),
+				'pitch'  => (float) Options::get( 'browser_pitch', 1.0 ),
 			),
 			'version'        => (int) $row['version'],
 		);
@@ -659,17 +661,21 @@ final class NarrativeManager {
 	 * @param int  $collection_id Collection ID.
 	 * @param bool $only_pending  Skip items whose narrative is ready/review.
 	 * @param bool $force         Force regeneration.
+	 * @param int  $limit         Max items to queue (0 = all).
 	 * @return int Items queued.
 	 */
-	public function enqueue_collection( int $collection_id, bool $only_pending = true, bool $force = false ): int {
+	public function enqueue_collection( int $collection_id, bool $only_pending = true, bool $force = false, int $limit = 0 ): int {
 		if ( ! CollectionSettings::is_enabled( $collection_id ) ) {
 			return 0;
 		}
 		$n = 0;
 		foreach ( ItemDetector::collection_item_ids( $collection_id ) as $item_id ) {
+			if ( $limit > 0 && $n >= $limit ) {
+				break;
+			}
 			if ( $only_pending && ! $force ) {
 				$row = $this->repo->get_current( $item_id );
-				if ( $row && in_array( $row['status'], array( Repo::STATUS_READY, Repo::STATUS_REVIEW, Repo::STATUS_QUEUED ), true ) ) {
+				if ( $row && in_array( $row['status'], array( Repo::STATUS_READY, Repo::STATUS_REVIEW, Repo::STATUS_QUEUED, Repo::STATUS_SCRIPTING, Repo::STATUS_SYNTHESIZING, Repo::STATUS_EXTRACTING ), true ) ) {
 					continue;
 				}
 			}
@@ -679,6 +685,111 @@ final class NarrativeManager {
 			}
 		}
 		return $n;
+	}
+
+	/**
+	 * Queues pending items of every enabled collection (bulk button / cron).
+	 *
+	 * Pending = no narrative, stale, error, or a template fallback produced
+	 * while the AI was down (those are upgraded when AI is available).
+	 *
+	 * @param int $limit Max items to queue in this pass (0 = all).
+	 * @return array{queued:int,collections:int}
+	 */
+	public function enqueue_pending_everywhere( int $limit = 0 ): array {
+		$queued = 0;
+		$cols   = 0;
+		foreach ( CollectionSettings::enabled_ids() as $collection_id ) {
+			++$cols;
+			$remaining = $limit > 0 ? $limit - $queued : 0;
+			if ( $limit > 0 && $remaining <= 0 ) {
+				break;
+			}
+			$queued += $this->enqueue_collection( $collection_id, true, false, $remaining );
+
+			// Upgrade template fallbacks once an AI provider is usable for the collection.
+			$config = CollectionSettings::effective( $collection_id );
+			$reason = null;
+			if ( $this->ai->for_collection( $config, $reason ) && 'faithful' !== $config['mode'] ) {
+				$remaining = $limit > 0 ? $limit - $queued : 0;
+				if ( $limit > 0 && $remaining <= 0 ) {
+					break;
+				}
+				foreach ( $this->repo->fallback_item_ids( $collection_id, $limit > 0 ? $remaining : 200 ) as $item_id ) {
+					$job = $this->enqueue( $item_id, array( 'force' => true ), 30 );
+					if ( ! is_wp_error( $job ) ) {
+						++$queued;
+					}
+				}
+			}
+		}
+		return array(
+			'queued'      => $queued,
+			'collections' => $cols,
+		);
+	}
+
+	/**
+	 * Queues approval (script → audio) for every narrative waiting for review.
+	 *
+	 * @param int $user_id Approver recorded on each row.
+	 * @param int $limit   Max items (0 = all).
+	 * @return int Jobs queued.
+	 */
+	public function approve_all_pending( int $user_id, int $limit = 0 ): int {
+		$n = 0;
+		foreach ( $this->repo->item_ids_by_status( Repo::STATUS_REVIEW, $limit > 0 ? $limit : 5000 ) as $item_id ) {
+			$job = $this->jobs->enqueue(
+				$item_id,
+				array(
+					'action'      => 'approve',
+					'approved_by' => $user_id,
+				),
+				8
+			);
+			if ( $job > 0 ) {
+				++$n;
+			}
+		}
+		return $n;
+	}
+
+	/**
+	 * Coverage per enabled collection (dashboard).
+	 *
+	 * @return array<int,array<string,mixed>>
+	 */
+	public function coverage(): array {
+		$out    = array();
+		$by_col = $this->repo->coverage_counts();
+		foreach ( CollectionSettings::enabled_ids() as $collection_id ) {
+			$collection = ItemDetector::get_collection( $collection_id );
+			if ( ! $collection ) {
+				continue;
+			}
+			$items  = count( ItemDetector::collection_item_ids( $collection_id, 5000 ) );
+			$counts = $by_col[ $collection_id ] ?? array();
+			$ready  = (int) ( $counts[ Repo::STATUS_READY ] ?? 0 );
+			$review = (int) ( $counts[ Repo::STATUS_REVIEW ] ?? 0 );
+			$stale  = (int) ( $counts[ Repo::STATUS_STALE ] ?? 0 );
+			$error  = (int) ( $counts[ Repo::STATUS_ERROR ] ?? 0 );
+			$skip   = (int) ( $counts[ Repo::STATUS_INSUFFICIENT ] ?? 0 ) + (int) ( $counts[ Repo::STATUS_REQUIRES_OCR ] ?? 0 );
+			$busy   = (int) ( $counts[ Repo::STATUS_QUEUED ] ?? 0 ) + (int) ( $counts[ Repo::STATUS_SCRIPTING ] ?? 0 ) + (int) ( $counts[ Repo::STATUS_SYNTHESIZING ] ?? 0 ) + (int) ( $counts[ Repo::STATUS_EXTRACTING ] ?? 0 );
+			$out[]  = array(
+				'collection_id' => $collection_id,
+				'name'          => (string) $collection->get_name(),
+				'items'         => $items,
+				'ready'         => $ready,
+				'review'        => $review,
+				'stale'         => $stale,
+				'error'         => $error,
+				'skipped'       => $skip,
+				'busy'          => $busy,
+				'missing'       => max( 0, $items - $ready - $review - $stale - $error - $skip - $busy ),
+				'percent'       => $items > 0 ? (int) round( 100 * $ready / $items ) : 0,
+			);
+		}
+		return $out;
 	}
 
 	// -------------------------------------------------------------------------
@@ -733,7 +844,7 @@ final class NarrativeManager {
 
 		$this->repo->set_status( $row_id, Repo::STATUS_SYNTHESIZING );
 		$audio = $provider->synthesize(
-			$script,
+			SpeechText::script_for_speech( $script ),
 			$voice,
 			array(
 				'speed'  => $speed,

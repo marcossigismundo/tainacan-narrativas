@@ -534,6 +534,28 @@
 					}, 200 );
 				} ).catch( function ( e ) { output( panel, errMsg( e ), 'error' ); } );
 				break;
+			case 'generate-all':
+				output( panel, I.working || 'Processando…' );
+				api( { path: NS + '/collections/generate-all', method: 'POST', data: {} } ).then( function ( r ) {
+					output( panel, r.queued + ' item(ns) enfileirado(s) em ' + r.collections + ' coleção(ões). Executando a fila…' );
+					runQueue( function ( totals ) {
+						output( panel, 'Concluído nesta sessão: ' + totals.done + ' ok, ' + totals.retry + ' reagendados, ' + totals.failed + ' falhas. Itens restantes continuam pelo WP-Cron; recarregue o painel para ver a cobertura atualizada.', 'success' );
+					}, 400 );
+				} ).catch( function ( e ) { output( panel, errMsg( e ), 'error' ); } );
+				break;
+			case 'approve-all':
+				if ( ! window.confirm( I.confirmApproveAll || 'Aprovar todos os roteiros em revisão e gerar o áudio de cada um?' ) ) {
+					return;
+				}
+				output( panel, I.working || 'Processando…' );
+				api( { path: NS + '/narratives/approve-all', method: 'POST', data: {} } ).then( function ( r ) {
+					output( panel, r.queued + ' aprovação(ões) enfileirada(s). Executando a fila…' );
+					runQueue( function ( totals ) {
+						output( panel, 'Concluído: ' + totals.done + ' ok, ' + totals.retry + ' reagendados, ' + totals.failed + ' falhas.', 'success' );
+						loadList();
+					}, 400 );
+				} ).catch( function ( e ) { output( panel, errMsg( e ), 'error' ); } );
+				break;
 			case 'test-provider':
 				output( panel, I.testing || 'Testando…' );
 				api( { path: NS + '/providers/test', method: 'POST', data: { kind: target.getAttribute( 'data-kind' ) } } ).then( function ( r ) {

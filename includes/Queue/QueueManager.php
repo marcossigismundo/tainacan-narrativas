@@ -25,15 +25,19 @@ if ( ! defined( 'ABSPATH' ) ) {
  *  - tn_check_item (single, debounced): re-hashes one item after a change.
  *  - tn_stale_sweep (daily): walks ready narratives in pages to catch changes
  *    that bypassed the hooks (direct DB edits, file replacements…).
+ *  - tn_coverage_sweep (hourly): queues items of enabled collections that
+ *    still have no narrative (or a stale/error one), so every item ends up
+ *    with a ready narrative without anyone pressing a button.
  *
  * "Executar fila" in the admin and `wp tainacan-narrativas queue` call process()
  * directly, which is how sites without a reliable WP-Cron drain the queue.
  */
 final class QueueManager {
 
-	public const HOOK_PROCESS = 'tn_process_queue';
-	public const HOOK_CHECK   = 'tn_check_item';
-	public const HOOK_SWEEP   = 'tn_stale_sweep';
+	public const HOOK_PROCESS  = 'tn_process_queue';
+	public const HOOK_CHECK    = 'tn_check_item';
+	public const HOOK_SWEEP    = 'tn_stale_sweep';
+	public const HOOK_COVERAGE = 'tn_coverage_sweep';
 
 	/**
 	 * Manager.
@@ -60,9 +64,34 @@ final class QueueManager {
 		add_action( self::HOOK_PROCESS, array( $this, 'cron_process' ) );
 		add_action( self::HOOK_CHECK, array( $this, 'cron_check_item' ) );
 		add_action( self::HOOK_SWEEP, array( $this, 'cron_sweep' ) );
+		add_action( self::HOOK_COVERAGE, array( $this, 'cron_coverage' ) );
 
 		if ( Options::is( 'cron_enabled' ) && ! wp_next_scheduled( self::HOOK_PROCESS ) ) {
 			wp_schedule_event( time() + 60, 'tn_every_minute', self::HOOK_PROCESS );
+		}
+		if ( Options::is( 'cron_enabled' ) && Options::is( 'auto_coverage' ) && ! wp_next_scheduled( self::HOOK_COVERAGE ) ) {
+			wp_schedule_event( time() + 5 * MINUTE_IN_SECONDS, 'hourly', self::HOOK_COVERAGE );
+		}
+	}
+
+	/**
+	 * Cron: keep every enabled collection covered.
+	 *
+	 * @return void
+	 */
+	public function cron_coverage(): void {
+		if ( ! Options::is( 'cron_enabled' ) || ! Options::is( 'auto_coverage' ) || ! Options::is( 'enabled' ) ) {
+			return;
+		}
+		// Do not pile up: only top the queue up to the batch size.
+		$pending = (int) $this->manager->jobs()->counts()['queued'];
+		$batch   = max( 1, (int) Options::get( 'coverage_batch', 25 ) );
+		if ( $pending >= $batch ) {
+			return;
+		}
+		$result = $this->manager->enqueue_pending_everywhere( $batch - $pending );
+		if ( $result['queued'] > 0 ) {
+			Logger::info( 'Coverage sweep queued items', $result );
 		}
 	}
 
@@ -96,6 +125,10 @@ final class QueueManager {
 		if ( ! Lock::acquire( 'queue', 15 * MINUTE_IN_SECONDS ) ) {
 			$summary['skipped'] = true;
 			return $summary;
+		}
+		if ( function_exists( 'set_time_limit' ) && ! ini_get( 'safe_mode' ) ) {
+			// phpcs:ignore Squiz.PHP.DiscouragedFunctions.Discouraged -- Queue worker: one job chains several AI/TTS HTTP calls (up to ai_timeout + tts_timeout each) and a host default of 30 s would kill it mid-way, leaving the item locked for 15 min; the run is still bounded by the time budget, the batch size and the queue lock.
+			set_time_limit( max( 600, $budget + (int) Options::get( 'ai_timeout', 180 ) * 3 + (int) Options::get( 'tts_timeout', 180 ) ) );
 		}
 		$started = microtime( true );
 		try {

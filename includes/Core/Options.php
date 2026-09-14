@@ -54,14 +54,16 @@ final class Options {
 			'setup_done'              => 0,
 			'enabled'                 => 0,
 			'autoinject'              => 1,
-			'trigger_on_save'         => 'mark_stale', // none | mark_stale | queue.
+			'trigger_on_save'         => 'queue', // none | mark_stale | queue.
 			'cron_enabled'            => 1,
 			'cron_batch'              => 3,
 			'cron_time_budget'        => 20,
 			'max_attempts'            => 3,
+			'auto_coverage'           => 1,
+			'coverage_batch'          => 150,
 			'default_mode'            => 'documentary',
 			'default_language'        => 'pt-BR',
-			'editorial_flow'          => 'review', // auto | review.
+			'editorial_flow'          => 'auto', // auto | review.
 			'allow_download'          => 0,
 			'provenance_notice'       => 1,
 			'keep_versions'           => 3,
@@ -78,9 +80,10 @@ final class Options {
 			'ai_base_url'             => '',
 			'ai_model'                => '',
 			'ai_api_key'              => '',
-			'ai_timeout'              => 120,
-			'ai_temperature'          => 0.3,
-			'ai_max_tokens'           => 2500,
+			'ai_timeout'              => 180,
+			'ai_temperature'          => 0.45,
+			'ai_max_tokens'           => 4000,
+			'ai_analysis'             => 1,
 			'ollama_base_url'         => 'http://127.0.0.1:11434',
 			'ollama_model'            => 'llama3.2',
 			'gemini_model'            => 'gemini-2.5-flash',
@@ -101,7 +104,9 @@ final class Options {
 			'children_mode'           => 0,
 			'browser_lang'            => 'pt-BR',
 			'browser_voice_hint'      => '',
+			'browser_voice_gender'    => 'female', // female | male | any.
 			'browser_rate'            => 1.0,
+			'browser_pitch'           => 1.0,
 			// Security & misc.
 			'allow_private_endpoints' => 0,
 			'debug'                   => 0,

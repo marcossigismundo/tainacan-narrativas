@@ -12,6 +12,7 @@ namespace TainacanNarrativas\Frontend;
 use TainacanNarrativas\Narrative\Modes;
 use TainacanNarrativas\Narrative\NarrativeManager;
 use TainacanNarrativas\Narrative\Normalizer;
+use TainacanNarrativas\Narrative\SpeechText;
 use TainacanNarrativas\Tainacan\CollectionSettings;
 use TainacanNarrativas\Tainacan\ItemDetector;
 
@@ -193,14 +194,15 @@ final class Player {
 			'allowDownload' => (bool) $payload['allow_download'],
 			'lang'          => $payload['browser']['lang'],
 			'voiceHint'     => $payload['browser']['voice'],
+			'voiceGender'   => $payload['browser']['gender'],
 			'rate'          => (float) $payload['browser']['rate'],
+			'pitch'         => (float) $payload['browser']['pitch'],
 			'title'         => get_the_title( $item_id ),
 			'restUrl'       => rest_url( 'tainacan-narrativas/v1/public/items/' . $item_id ),
 		);
 
 		$mode_label = Modes::labels()[ $payload['mode'] ] ?? '';
-		$paragraphs = preg_split( '/\n{2,}/u', (string) $payload['transcript'] );
-		$paragraphs = false === $paragraphs ? array() : $paragraphs;
+		$segments   = SpeechText::segments( (string) $payload['transcript'] );
 		$duration   = $this->format_duration( (float) $payload['duration'] );
 
 		ob_start();

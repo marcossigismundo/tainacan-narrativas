@@ -335,6 +335,54 @@ final class NarrativeRepository {
 	}
 
 	/**
+	 * Items of a collection whose current narrative is a template fallback
+	 * produced while the AI failed (stats.ai_fallback present).
+	 *
+	 * @param int $collection_id Collection ID.
+	 * @param int $limit         Max IDs.
+	 * @return int[]
+	 */
+	public function fallback_item_ids( int $collection_id, int $limit = 200 ): array {
+		global $wpdb;
+		$table = Tables::narratives();
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Plugin's own table; bulk/cron path; JSON column probed with LIKE on a %s placeholder.
+		$ids = $wpdb->get_col( $wpdb->prepare( "SELECT item_id FROM {$table} WHERE is_current = 1 AND collection_id = %d AND status = %s AND ai_provider = %s AND stats LIKE %s ORDER BY id ASC LIMIT %d", $collection_id, self::STATUS_READY, 'template', '%' . $wpdb->esc_like( '"ai_fallback"' ) . '%', max( 1, $limit ) ) );
+		return array_map( 'intval', is_array( $ids ) ? $ids : array() );
+	}
+
+	/**
+	 * Item IDs whose current narrative has a given status.
+	 *
+	 * @param string $status Status.
+	 * @param int    $limit  Max IDs.
+	 * @return int[]
+	 */
+	public function item_ids_by_status( string $status, int $limit = 5000 ): array {
+		global $wpdb;
+		$table = Tables::narratives();
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Plugin's own table; bulk path; input via %s/%d placeholders.
+		$ids = $wpdb->get_col( $wpdb->prepare( "SELECT item_id FROM {$table} WHERE is_current = 1 AND status = %s ORDER BY id ASC LIMIT %d", $status, max( 1, $limit ) ) );
+		return array_map( 'intval', is_array( $ids ) ? $ids : array() );
+	}
+
+	/**
+	 * Status counters per collection (dashboard coverage).
+	 *
+	 * @return array<int,array<string,int>>
+	 */
+	public function coverage_counts(): array {
+		global $wpdb;
+		$table = Tables::narratives();
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Aggregate COUNT/GROUP BY on the plugin's own table; not expressible via WP_Query.
+		$rows = $wpdb->get_results( "SELECT collection_id, status, COUNT(*) AS c FROM {$table} WHERE is_current = 1 GROUP BY collection_id, status", ARRAY_A );
+		$out  = array();
+		foreach ( (array) $rows as $row ) {
+			$out[ (int) $row['collection_id'] ][ (string) $row['status'] ] = (int) $row['c'];
+		}
+		return $out;
+	}
+
+	/**
 	 * Encodes JSON columns.
 	 *
 	 * @param array<string,mixed> $data Raw data.

@@ -2,6 +2,27 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/); versionamento semântico.
 
+## [1.1.0] — 2026-09-14
+
+### Adicionado
+- `Narrative\SpeechText`: preparação do texto para a fala (datas → palavras, siglas hifenizadas sem "menos", abreviações, ordinais, algarismos romanos, moeda, URLs/e-mails, texto em caixa alta), segmentação em sentenças robusta a abreviações/iniciais/decimais e fragmentação em utterances ≤ 170 caracteres. Aplicada ao player (atributos `data-tn-speech`/`data-tn-parts`) e ao TTS de servidor (`audio_hash` inclui `SpeechText::VERSION`).
+- `Narrative\ExtractiveSummarizer` e `Narrative\MetadataPhraser`: roteiro por template condensa documentos longos por saliência (nomes, datas, números, citações, posição) em ordem de leitura e lê metadados como frases; o modo "Leitura fiel" continua literal.
+- Passo de análise da IA (`prompts/analysis.php`): dossiê do documento (tipo, pessoas, cronologia, passagens literais, fio condutor) antes da escrita; opção `ai_analysis` (padrão ligado), cache por hash.
+- Cobertura automática: cron horário `tn_coverage_sweep` (`auto_coverage`, `coverage_batch`), `POST /collections/generate-all`, `POST /narratives/approve-all`, `GET /coverage`, painel "Cobertura das coleções" no dashboard; job `approve` na fila; fallbacks de template gerados durante queda da IA são regenerados quando a IA volta.
+- Voz do navegador: ranking de vozes por idioma, qualidade (Natural/Online/Neural/Premium) e timbre (`browser_voice_gender`, padrão feminino), `browser_pitch`, nome da voz exibido no player, clique na sentença do transcript para pular.
+
+### Alterado
+- Prompts reescritos (system + modos + redução/consolidação) para narração oral rica, com abertura concreta, cobertura do documento inteiro, citações literais breves e proibição explícita de estrutura/vocabulário de texto automático; `SourceHasher::PROMPT_VERSION` = 2 (narrativas existentes ficam desatualizadas e são regeneradas pela cobertura automática).
+- `NarrativeGenerator::post_process()` remove preâmbulos de chat, blocos `<think>`, linha-título solta, encerramentos e aberturas de frase típicas de IA ("Vale ressaltar que", "Em suma", "Neste registro"…).
+- Erros `tn_ai_malformed`/`tn_ai_invalid_json` passam a ser reprocessados com backoff (antes caíam direto para o template).
+- Orçamento de tokens de saída proporcional ao alvo de palavras (`ai_max_tokens` vira piso; padrão 4000); `ai_temperature` padrão 0,45; `ai_timeout` 180 s.
+- Padrões para novas instalações: `editorial_flow` = `auto`, `trigger_on_save` = `queue`.
+- `player.js` reescrito em ES5 estrito (sem lookbehind: o script inteiro falhava em Safari < 16.4), com espera pelas vozes, atraso após `cancel()`, keep-alive do Chrome, `onboundary` para progresso e retomada por trecho.
+
+### Corrigido
+- Fala cortada no meio de frases longas e sílabas perdidas ao iniciar/pausar/mudar velocidade (Chrome).
+- Voz "Desktop" legada escolhida no Windows mesmo com voz neural disponível.
+
 ## [1.0.0] — 2026-09-02
 
 ### Adicionado

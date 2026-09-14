@@ -136,3 +136,7 @@ a.tn-card:hover, a.tn-card:focus { border-color: var(--tn-primary); box-shadow: 
 .tn-toast--success { background: var(--tn-success); }
 [data-tn-provider-pane] { display: none; }
 [data-tn-provider-pane].is-visible { display: block; }
+
+/* Coverage progress (dashboard). */
+.tn-progress { display: inline-block; vertical-align: middle; width: 90px; height: 8px; border-radius: 4px; background: var(--tn-bg-soft, #eef2f3); overflow: hidden; }
+.tn-progress span { display: block; height: 100%; background: var(--tn-primary, #298596); border-radius: 4px; }

@@ -4,7 +4,7 @@ Tags: tainacan, audio, acessibilidade, narrativa, text-to-speech
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -61,6 +61,12 @@ Somente título, descrição, nome da coleção, metadados públicos e o texto d
 No banco (mascaradas no painel, nunca enviadas ao navegador) ou, preferencialmente, em `wp-config.php` via `TN_AI_API_KEY`, `TN_GEMINI_API_KEY` e `TN_TTS_API_KEY`.
 
 == Changelog ==
+
+= 1.1.0 =
+* Voz do navegador: escolha automática da melhor voz (neural/natural, timbre feminino suave por padrão, configurável), texto preparado para a fala (datas, siglas, abreviações, números, romanos, moeda) e frases enviadas em trechos curtos — sem cortes nem sílabas perdidas no Chrome; player compatível com Safari antigo; clique na frase do texto para ouvir dali.
+* Narrativa por IA: leitura prévia do documento inteiro (dossiê) antes da escrita, prompts reescritos para prosa narrativa rica e sem estrutura de texto automático, limpeza determinística de fórmulas de IA, orçamento de tokens proporcional ao tamanho da narração; respostas malformadas são reprocessadas em vez de cair para o template.
+* Roteiro sem IA: sumarizador extrativo (mantém as frases com nomes, datas, lugares, números e citações, na ordem) em vez de cortar o documento após N palavras; metadados lidos como frases naturais.
+* Cobertura automática: varredura horária enfileira itens sem narrativa, desatualizados ou com erro; botão "Gerar todas as narrativas pendentes" e "Aprovar todas em revisão"; painel de cobertura por coleção. Fluxo padrão passa a ser automático (roteiro → áudio), com regeneração na fila ao salvar itens.
 
 = 1.0.0 =
 * Primeira versão: coleta documental, extração de texto, roteiro por template e por IA, TTS (navegador, API compatível com OpenAI/Kokoro, Piper, WordPress AI), fila com detecção de alterações, player acessível, administração integrada ao Tainacan, REST, WP-CLI.

@@ -49,6 +49,7 @@ final class Assets {
 				'download'      => __( 'Baixar áudio', 'tainacan-narrativas' ),
 				'unsupported'   => __( 'Seu navegador não oferece síntese de voz. O texto da narrativa está disponível abaixo.', 'tainacan-narrativas' ),
 				'loadingVoices' => __( 'Preparando a voz…', 'tainacan-narrativas' ),
+				'voice'         => __( 'Voz', 'tainacan-narrativas' ),
 				'browserVoice'  => __( 'Voz do navegador', 'tainacan-narrativas' ),
 				'timeOf'        => /* translators: 1: current time, 2: total duration. */ __( '%1$s de %2$s', 'tainacan-narrativas' ),
 				'error'         => __( 'Não foi possível reproduzir o áudio.', 'tainacan-narrativas' ),

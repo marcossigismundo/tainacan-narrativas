@@ -23,6 +23,7 @@
  * @var array<string,mixed>  $collection_entry    Collection entry.
  * @var array<int,array>     $collection_metadata Collection metadata.
  * @var array<int,array>     $diagnostics         Diagnostics rows.
+ * @var array<int,array>     $coverage            Coverage per enabled collection (dashboard).
  * @var array<string,array>  $providers_state     Provider configured flags.
  * @var \TainacanNarrativas\Narrative\NarrativeManager $manager Manager.
  *

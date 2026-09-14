@@ -88,10 +88,21 @@ $tn_tts_mask   = Options::secret_mask( 'tts_api_key' );
 			</div>
 
 			<h3><?php esc_html_e( 'Voz do navegador (fallback)', 'tainacan-narrativas' ); ?></h3>
+			<p class="description"><?php esc_html_e( 'O player escolhe automaticamente a melhor voz disponível no dispositivo do visitante para o idioma: prioriza vozes neurais/naturais (ex.: "Microsoft Francisca Online (Natural)" no Windows, "Luciana" no macOS/iOS, "Google português do Brasil" no Chrome/Android) e o timbre preferido abaixo. O texto é preparado para a fala: datas, siglas, abreviações e números são convertidos e cada frase é enviada em trechos curtos, evitando cortes e sílabas perdidas.', 'tainacan-narrativas' ); ?></p>
 			<div class="tn-field-row">
 				<div class="tn-field"><label for="tn-browser-lang"><?php esc_html_e( 'Idioma', 'tainacan-narrativas' ); ?></label><input type="text" id="tn-browser-lang" name="tn[browser_lang]" value="<?php echo esc_attr( (string) $settings['browser_lang'] ); ?>"></div>
-				<div class="tn-field"><label for="tn-browser-voice"><?php esc_html_e( 'Preferência de voz (trecho do nome, ex.: "Francisca")', 'tainacan-narrativas' ); ?></label><input type="text" id="tn-browser-voice" name="tn[browser_voice_hint]" value="<?php echo esc_attr( (string) $settings['browser_voice_hint'] ); ?>"></div>
+				<div class="tn-field"><label for="tn-browser-gender"><?php esc_html_e( 'Timbre preferido', 'tainacan-narrativas' ); ?></label>
+					<select id="tn-browser-gender" name="tn[browser_voice_gender]">
+						<option value="female" <?php selected( $settings['browser_voice_gender'] ?? 'female', 'female' ); ?>><?php esc_html_e( 'Feminino, suave (recomendado)', 'tainacan-narrativas' ); ?></option>
+						<option value="male" <?php selected( $settings['browser_voice_gender'] ?? 'female', 'male' ); ?>><?php esc_html_e( 'Masculino', 'tainacan-narrativas' ); ?></option>
+						<option value="any" <?php selected( $settings['browser_voice_gender'] ?? 'female', 'any' ); ?>><?php esc_html_e( 'Indiferente (melhor qualidade disponível)', 'tainacan-narrativas' ); ?></option>
+					</select>
+				</div>
+				<div class="tn-field"><label for="tn-browser-voice"><?php esc_html_e( 'Voz específica (trecho do nome, opcional)', 'tainacan-narrativas' ); ?></label><input type="text" id="tn-browser-voice" name="tn[browser_voice_hint]" value="<?php echo esc_attr( (string) $settings['browser_voice_hint'] ); ?>" placeholder="Francisca"></div>
+			</div>
+			<div class="tn-field-row">
 				<div class="tn-field"><label for="tn-browser-rate"><?php esc_html_e( 'Velocidade padrão', 'tainacan-narrativas' ); ?></label><input type="number" id="tn-browser-rate" name="tn[browser_rate]" min="0.5" max="2" step="0.05" value="<?php echo esc_attr( (string) $settings['browser_rate'] ); ?>"></div>
+				<div class="tn-field"><label for="tn-browser-pitch"><?php esc_html_e( 'Tom (1 = natural; valores menores soam mais graves e calmos)', 'tainacan-narrativas' ); ?></label><input type="number" id="tn-browser-pitch" name="tn[browser_pitch]" min="0.5" max="2" step="0.05" value="<?php echo esc_attr( (string) ( $settings['browser_pitch'] ?? 1.0 ) ); ?>"></div>
 			</div>
 
 			<h3><?php esc_html_e( 'Parâmetros', 'tainacan-narrativas' ); ?></h3>

@@ -274,10 +274,30 @@
 	margin-bottom: 0;
 }
 
+.tn-sentence {
+	cursor: pointer;
+	transition: background 0.2s ease;
+}
+
+.tn-sentence:hover {
+	text-decoration: underline dotted;
+	text-underline-offset: 3px;
+}
+
 .tn-sentence.tn-current {
 	background: color-mix(in srgb, var(--tn-primary) 18%, transparent);
 	box-shadow: 0 0 0 2px color-mix(in srgb, var(--tn-primary) 18%, transparent);
 	border-radius: 3px;
+}
+
+.tn-voice-name {
+	margin-left: auto;
+	font-size: 0.8rem;
+	color: var(--tn-text-light);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-width: 100%;
 }
 
 @supports not (background: color-mix(in srgb, #000 10%, transparent)) {
