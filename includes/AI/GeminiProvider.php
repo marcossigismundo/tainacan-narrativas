@@ -40,11 +40,13 @@ final class GeminiProvider extends AbstractHttpProvider implements AIProviderInt
 
 	/**
 	 * Constructor.
+	 *
+	 * @param array<string,string> $config Overrides: model|api_key.
 	 */
-	public function __construct() {
-		$model          = trim( (string) Options::get( 'gemini_model', 'gemini-2.5-flash' ) );
+	public function __construct( array $config = array() ) {
+		$model          = trim( (string) ( $config['model'] ?? Options::get( 'gemini_model', 'gemini-2.5-flash' ) ) );
 		$this->model_id = '' !== $model ? $model : 'gemini-2.5-flash';
-		$this->api_key  = Options::secret( 'gemini_api_key' );
+		$this->api_key  = isset( $config['api_key'] ) ? (string) $config['api_key'] : Options::secret( 'gemini_api_key' );
 	}
 
 	/**
@@ -59,6 +61,36 @@ final class GeminiProvider extends AbstractHttpProvider implements AIProviderInt
 	 */
 	public function label(): string {
 		return 'Google Gemini';
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public function description(): string {
+		return __( 'IA do Google com contexto muito longo (documentos grandes) e plano gratuito no AI Studio.', 'tainacan-narrativas' );
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public function catalog(): array {
+		return array(
+			array(
+				'id'          => 'gemini-2.5-pro',
+				'name'        => 'Gemini 2.5 Pro',
+				'description' => __( 'Modelo mais capaz, com raciocínio', 'tainacan-narrativas' ),
+			),
+			array(
+				'id'          => 'gemini-2.5-flash',
+				'name'        => 'Gemini 2.5 Flash',
+				'description' => __( 'Rápido e econômico (recomendado)', 'tainacan-narrativas' ),
+			),
+			array(
+				'id'          => 'gemini-2.5-flash-lite',
+				'name'        => 'Gemini 2.5 Flash-Lite',
+				'description' => __( 'O mais econômico da família', 'tainacan-narrativas' ),
+			),
+		);
 	}
 
 	/**
@@ -112,12 +144,12 @@ final class GeminiProvider extends AbstractHttpProvider implements AIProviderInt
 				),
 			),
 			'generationConfig'  => array(
-				'temperature'     => (float) ( $options['temperature'] ?? Options::get( 'ai_temperature', 0.3 ) ),
-				'maxOutputTokens' => (int) ( $options['max_tokens'] ?? Options::get( 'ai_max_tokens', 2500 ) ),
+				'temperature'     => (float) ( $options['temperature'] ?? Options::get( 'ai_temperature', 0.45 ) ),
+				'maxOutputTokens' => (int) ( $options['max_tokens'] ?? Options::get( 'ai_max_tokens', 4000 ) ),
 			),
 		);
 		$url  = self::BASE_URL . '/models/' . rawurlencode( $this->model_id ) . ':generateContent';
-		$data = $this->post_json( $url, $body, $this->headers(), (int) ( $options['timeout'] ?? Options::get( 'ai_timeout', 120 ) ) );
+		$data = $this->post_json( $url, $body, $this->headers(), (int) ( $options['timeout'] ?? Options::get( 'ai_timeout', 180 ) ) );
 		if ( is_wp_error( $data ) ) {
 			return $data;
 		}

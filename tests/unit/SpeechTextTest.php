@@ -42,6 +42,18 @@ final class SpeechTextTest extends TestCase {
 		$this->assertStringContainsString( 'Luís quatorze', $out );
 	}
 
+	public function test_never_invents_words_from_initials_or_ambiguous_abbreviations(): void {
+		$this->assertSame( 'Depoimento de V. S. R. Silva.', SpeechText::for_speech( 'Depoimento de V. S. R. Silva.' ) );
+		$this->assertSame( 'Depoimento de V.S.R.', SpeechText::for_speech( 'Depoimento de V.S.R.' ) );
+		$this->assertSame( 'Assinado por Fulano L. e Beltrana C. em 1920.', SpeechText::for_speech( 'Assinado por Fulano L. e Beltrana C. em 1920.' ) );
+		$this->assertSame( 'O Cap. João e a Sec. de Saúde; ver p. 3 e ed. anterior.', SpeechText::for_speech( 'O Cap. João e a Sec. de Saúde; ver p. 3 e ed. anterior.' ) );
+		$this->assertSame( 'Art. de opinião e artigo 5 da lei.', SpeechText::for_speech( 'Art. de opinião e art. 5 da lei.' ), 'article expands only before a number' );
+		$this->assertSame( 'Não sei SE ele vai PARA lá; TO cansado.', SpeechText::for_speech( 'Não sei SE ele vai PARA lá; TO cansado.' ), 'ambiguous state codes need a place context' );
+		$this->assertStringContainsString( 'Belém (Pará)', SpeechText::for_speech( 'Nascida em Belém (PA).' ) );
+		$this->assertStringContainsString( 'Aracaju - Sergipe', SpeechText::for_speech( 'Aracaju - SE, 2020.' ) );
+		$this->assertSame( 'Ligue 3222 1234.', SpeechText::for_speech( 'Ligue 3222-1234.' ), 'phone numbers are not year ranges ("a")' );
+	}
+
 	public function test_acronyms_without_vowels_are_spelled_and_words_kept(): void {
 		$out = SpeechText::for_speech( 'A OMS e a UBS avisaram; o PDF do CNPJ chegou. Não se sabe se ele voltou.' );
 		$this->assertStringContainsString( 'o m s', $out );
@@ -58,6 +70,11 @@ final class SpeechTextTest extends TestCase {
 			$s
 		);
 		$this->assertSame( array( 'Ele disse: "Isso vai passar".', 'Fim.' ), SpeechText::sentences( 'Ele disse: "Isso vai passar". Fim.' ) );
+		$this->assertSame(
+			array( '58. É sufocante a sensação de não saber quando isto irá acabar', 'Ana Manoela Primo dos Santos', 'Me chamo Ana Manoela e sou indígena.' ),
+			SpeechText::sentences( "58. É sufocante a sensação de não saber quando isto irá acabar\nAna Manoela Primo dos Santos\nMe chamo Ana Manoela e sou indígena." ),
+			'surviving line breaks (titles, signatures) are boundaries'
+		);
 	}
 
 	public function test_utterances_cut_at_clauses_and_never_exceed_limit(): void {

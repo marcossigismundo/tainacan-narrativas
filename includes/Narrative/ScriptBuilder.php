@@ -64,19 +64,36 @@ final class ScriptBuilder {
 	 * @return string
 	 */
 	public function build( array $corpus, string $mode, string $template = '' ): string {
-		$def          = Modes::get( $mode );
-		$target_words = (int) ( $def['target_words'] ?? 0 );
+		$target_words = Modes::target_words_for( $mode );
 		$faithful     = 'faithful' === $mode;
 		$template     = '' !== trim( $template ) ? $template : self::default_template();
 
 		$description = trim( (string) ( $corpus['description'] ?? '' ) );
 		$doc_text    = trim( (string) ( $corpus['document']['text'] ?? '' ) );
 		$truncated   = false;
+		$metadata    = $faithful ? $this->metadata_sentences( $corpus ) : $this->metadata_prose( $corpus );
 
-		// Budget: the document gets what is left after description and metadata.
+		// Budget: the document gets what is left after the fixed parts (intro
+		// lines, description, metadata, closing) so the whole script respects
+		// the duration cap, not just the document excerpt.
+		$overhead   = Normalizer::word_count(
+			PromptLoader::fill(
+				$template,
+				array(
+					'title'          => (string) ( $corpus['title'] ?? '' ),
+					'collection'     => (string) ( $corpus['collection_name'] ?? '' ),
+					'description'    => $description,
+					'metadata'       => $metadata,
+					'document_intro' => __( 'Dos documentos que acompanham este registro, destacam-se as seguintes passagens:', 'tainacan-narrativas' ),
+					'document'       => '',
+					'attachments'    => '',
+					'closing'        => __( 'Este registro contém mais informações do que as narradas aqui. Consulte a página do item para o conteúdo completo.', 'tainacan-narrativas' ),
+				)
+			)
+		);
 		$doc_budget = $target_words;
 		if ( $target_words > 0 ) {
-			$doc_budget = max( 120, $target_words - Normalizer::word_count( $description ) - 40 );
+			$doc_budget = max( 40, $target_words - $overhead );
 		}
 		if ( $doc_budget > 0 && '' !== $doc_text && Normalizer::word_count( $doc_text ) > $doc_budget ) {
 			$doc_text  = $faithful ? $this->limit_words( $doc_text, $doc_budget ) : ExtractiveSummarizer::summarize( $doc_text, $doc_budget );
@@ -84,7 +101,7 @@ final class ScriptBuilder {
 		}
 
 		$attachments = array();
-		$remaining   = $target_words > 0 ? max( 0, $target_words - Normalizer::word_count( $doc_text ) - Normalizer::word_count( $description ) ) : 0;
+		$remaining   = $target_words > 0 ? max( 0, $target_words - $overhead - Normalizer::word_count( $doc_text ) ) : 0;
 		foreach ( (array) ( $corpus['attachments'] ?? array() ) as $i => $att ) {
 			$text = trim( (string) ( $att['text'] ?? '' ) );
 			if ( '' === $text ) {
@@ -110,7 +127,7 @@ final class ScriptBuilder {
 			'title'          => (string) ( $corpus['title'] ?? '' ),
 			'collection'     => (string) ( $corpus['collection_name'] ?? '' ),
 			'description'    => $description,
-			'metadata'       => $faithful ? $this->metadata_sentences( $corpus ) : $this->metadata_prose( $corpus ),
+			'metadata'       => $metadata,
 			'document_intro' => '' !== $doc_text ? ( $truncated && ! $faithful ? __( 'Dos documentos que acompanham este registro, destacam-se as seguintes passagens:', 'tainacan-narrativas' ) : __( 'A documentação associada ao item registra o seguinte:', 'tainacan-narrativas' ) ) : '',
 			'document'       => $doc_text,
 			'attachments'    => implode( "\n\n", $attachments ),
@@ -133,7 +150,30 @@ final class ScriptBuilder {
 			}
 			$out[] = PromptLoader::fill( $line, $vars );
 		}
-		return Normalizer::clean( implode( "\n", $out ) );
+		$script = Normalizer::clean( implode( "\n", $out ) );
+		// Safety net for custom templates whose fixed text alone exceeds the cap.
+		if ( $target_words > 0 && Normalizer::word_count( $script ) > (int) ceil( $target_words * 1.1 ) ) {
+			$script = ExtractiveSummarizer::summarize( $script, $target_words );
+		}
+		return $script;
+	}
+
+	/**
+	 * Fixed sentences the template may emit (intro, document lead-in, closing,
+	 * attachment header). The faithfulness checker treats them as trusted:
+	 * they describe the narration itself, not the item.
+	 *
+	 * @return string[]
+	 */
+	public static function boilerplate_sentences(): array {
+		return array(
+			__( 'A documentação associada ao item registra o seguinte:', 'tainacan-narrativas' ),
+			__( 'Dos documentos que acompanham este registro, destacam-se as seguintes passagens:', 'tainacan-narrativas' ),
+			__( 'Este registro contém mais informações do que as narradas aqui.', 'tainacan-narrativas' ),
+			__( 'Consulte a página do item para o conteúdo completo.', 'tainacan-narrativas' ),
+			__( 'Este item integra a coleção {collection}.', 'tainacan-narrativas' ),
+			__( 'Você está ouvindo o registro "{title}".', 'tainacan-narrativas' ),
+		);
 	}
 
 	/**

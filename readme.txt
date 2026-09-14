@@ -4,7 +4,7 @@ Tags: tainacan, audio, acessibilidade, narrativa, text-to-speech
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 1.1.1
+Stable tag: 1.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -61,6 +61,13 @@ Somente título, descrição, nome da coleção, metadados públicos e o texto d
 No banco (mascaradas no painel, nunca enviadas ao navegador) ou, preferencialmente, em `wp-config.php` via `TN_AI_API_KEY`, `TN_GEMINI_API_KEY` e `TN_TTS_API_KEY`.
 
 == Changelog ==
+
+= 1.2.0 =
+* Fidelidade: cada frase gerada pela IA é verificada contra as fontes do item (números, nomes próprios, ancoragem lexical); a IA recebe uma correção, o que continuar sem apoio é removido e, se sobrar pouco, o roteiro por template (fiel por construção) é usado. Relatório visível em Narrativas → Fontes e saúde e via REST.
+* Prompts reescritos com "regra zero" de não invenção: sem contexto externo, sem cenas, sem completar lacunas; fontes curtas viram resumo breve e literal.
+* Duração máxima de 2 minutos por padrão (Configurações → Duração máxima, 280 palavras): vale para todos os modos; excedentes são condensados mantendo frases originais.
+* Voz: iniciais de nomes e abreviações ambíguas não são mais expandidas ("V.S.R." deixa de virar "rua"; "Cap.", "Sec.", "Fulano L." ficam como estão); siglas de estado ambíguas só em contexto de lugar; metadados lidos com frases neutras ("Local registrado: …").
+* IA no padrão do Oráculo Tainacan: cards de provedor (OpenAI, Claude, Gemini, Groq, DeepSeek, Ollama, compatível OpenAI, WordPress AI), catálogo de modelos por provedor, "Buscar modelos da conta" antes de salvar, chave própria por provedor (constantes TN_OPENAI_API_KEY, TN_CLAUDE_API_KEY, TN_GROQ_API_KEY, TN_DEEPSEEK_API_KEY), suporte a GPT-5/o-series (max_completion_tokens).
 
 = 1.1.1 =
 * CSS do admin e do player reescritos com escala tipográfica e de espaçamento consistente (fim dos textos ora grandes demais, ora pequenos demais).

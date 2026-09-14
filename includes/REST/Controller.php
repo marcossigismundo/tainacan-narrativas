@@ -89,6 +89,18 @@ final class Controller {
 			'default'           => false,
 			'sanitize_callback' => 'rest_sanitize_boolean',
 		);
+		// Unsaved credentials typed in the settings form (probe only; never persisted).
+		$secret_arg = array(
+			'type'              => 'string',
+			'default'           => '',
+			'sanitize_callback' => static fn( $v ) => is_string( $v ) ? trim( $v ) : '',
+			'validate_callback' => static fn( $v ) => is_string( $v ) && strlen( $v ) <= 512 && ! preg_match( '/[\r\n]/', $v ),
+		);
+		$url_arg    = array(
+			'type'              => 'string',
+			'default'           => '',
+			'sanitize_callback' => 'esc_url_raw',
+		);
 
 		register_rest_route(
 			self::NS,
@@ -380,7 +392,42 @@ final class Controller {
 						'default'           => '',
 						'sanitize_callback' => 'sanitize_key',
 					),
+					'api_key'  => $secret_arg,
+					'base_url' => $url_arg,
+					'model'    => array(
+						'type'              => 'string',
+						'default'           => '',
+						'sanitize_callback' => 'sanitize_text_field',
+					),
 				),
+			)
+		);
+		register_rest_route(
+			self::NS,
+			'/providers/models',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'providers_models' ),
+				'permission_callback' => array( $this, 'can_manage' ),
+				'args'                => array(
+					'provider' => array(
+						'required'          => true,
+						'type'              => 'string',
+						'sanitize_callback' => 'sanitize_key',
+					),
+					'api_key'  => $secret_arg,
+					'base_url' => $url_arg,
+				),
+			)
+		);
+		register_rest_route(
+			self::NS,
+			'/items/(?P<id>\d+)/faithfulness',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'item_faithfulness' ),
+				'permission_callback' => array( $this, 'can_review' ),
+				'args'                => array( 'id' => $id_arg ),
 			)
 		);
 		register_rest_route(
@@ -838,26 +885,72 @@ final class Controller {
 				'voice'       => $p->default_voice(),
 			);
 		}
+		$secrets = array();
+		foreach ( array_keys( Options::SECRET_CONSTANTS ) as $key ) {
+			$secrets[ $key ] = array(
+				'mask'     => Options::secret_mask( $key ),
+				'constant' => Options::secret_is_constant( $key ),
+			);
+		}
 		return rest_ensure_response(
 			array(
 				'ai'      => $ai,
 				'tts'     => $tts,
-				'secrets' => array(
-					'ai_api_key'     => array(
-						'mask'     => Options::secret_mask( 'ai_api_key' ),
-						'constant' => Options::secret_is_constant( 'ai_api_key' ),
-					),
-					'gemini_api_key' => array(
-						'mask'     => Options::secret_mask( 'gemini_api_key' ),
-						'constant' => Options::secret_is_constant( 'gemini_api_key' ),
-					),
-					'tts_api_key'    => array(
-						'mask'     => Options::secret_mask( 'tts_api_key' ),
-						'constant' => Options::secret_is_constant( 'tts_api_key' ),
-					),
-				),
+				'secrets' => $secrets,
 			)
 		);
+	}
+
+	/**
+	 * Models a provider's account/endpoint offers. Accepts a key/URL typed in
+	 * the form but not yet saved (never stored, never logged).
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return mixed
+	 */
+	public function providers_models( WP_REST_Request $request ) {
+		$provider = $this->manager->ai()->make(
+			(string) $request['provider'],
+			array(
+				'api_key'  => (string) $request['api_key'],
+				'base_url' => (string) $request['base_url'],
+			)
+		);
+		if ( ! $provider ) {
+			return new WP_Error( 'tn_not_found', __( 'Provedor não encontrado.', 'tainacan-narrativas' ), array( 'status' => 404 ) );
+		}
+		$ids = $provider->list_models();
+		if ( ! $ids ) {
+			return new WP_Error( 'tn_models_empty', __( 'O provedor não devolveu modelos para esta chave/URL. Confira a chave e o endpoint.', 'tainacan-narrativas' ), array( 'status' => 400 ) );
+		}
+		$names = array();
+		foreach ( $provider->catalog() as $entry ) {
+			$names[ $entry['id'] ] = $entry['name'];
+		}
+		$models = array();
+		foreach ( $ids as $id ) {
+			$models[] = array(
+				'id'   => $id,
+				'name' => $names[ $id ] ?? $id,
+			);
+		}
+		return rest_ensure_response(
+			array(
+				'provider' => $provider->id(),
+				'models'   => $models,
+			)
+		);
+	}
+
+	/**
+	 * Faithfulness report of the current script.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return mixed
+	 */
+	public function item_faithfulness( WP_REST_Request $request ) {
+		$report = $this->manager->faithfulness( (int) $request['id'] );
+		return is_wp_error( $report ) ? $this->error( $report ) : rest_ensure_response( $report );
 	}
 
 	/**
@@ -871,7 +964,14 @@ final class Controller {
 		$id   = (string) $request['provider'];
 		if ( 'ai' === $kind ) {
 			$id       = '' !== $id ? $id : (string) Options::get( 'ai_provider', 'none' );
-			$provider = $this->manager->ai()->get( $id );
+			$provider = $this->manager->ai()->make(
+				$id,
+				array(
+					'api_key'  => (string) $request['api_key'],
+					'base_url' => (string) $request['base_url'],
+					'model'    => (string) $request['model'],
+				)
+			);
 		} else {
 			$id       = '' !== $id ? $id : (string) Options::get( 'tts_provider', 'browser' );
 			$provider = $this->manager->tts()->get( $id );

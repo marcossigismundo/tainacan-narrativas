@@ -38,6 +38,12 @@ final class SpeechText {
 	/**
 	 * Abbreviations (lowercase, without the final dot) => spoken form.
 	 *
+	 * Deliberately conservative: an expansion that guesses wrong invents a
+	 * word the item never contained ("R." in a person's initials read as
+	 * "rua"). Only unambiguous forms are listed; anything that is also a
+	 * common word, a name initial or a homonym stays as written and is left
+	 * to the speech engine.
+	 *
 	 * @var array<string,string>
 	 */
 	private const ABBREVIATIONS = array(
@@ -51,63 +57,41 @@ final class SpeechText {
 		'srta'  => 'senhorita',
 		'prof'  => 'professor',
 		'profa' => 'professora',
-		'eng'   => 'engenheiro',
-		'enga'  => 'engenheira',
 		'exmo'  => 'excelentíssimo',
 		'exma'  => 'excelentíssima',
 		'ilmo'  => 'ilustríssimo',
 		'ilma'  => 'ilustríssima',
-		'pe'    => 'padre',
-		'fr'    => 'frei',
+		'eng'   => 'engenheiro',
+		'enga'  => 'engenheira',
+		'ten'   => 'tenente',
 		'gen'   => 'general',
 		'cel'   => 'coronel',
-		'cap'   => 'capítulo',
-		'ten'   => 'tenente',
 		'sgt'   => 'sargento',
+		'pe'    => 'padre',
+		'fr'    => 'frei',
 		'av'    => 'avenida',
-		'r'     => 'rua',
 		'pç'    => 'praça',
 		'trav'  => 'travessa',
 		'rod'   => 'rodovia',
 		'km'    => 'quilômetros',
 		'art'   => 'artigo',
 		'arts'  => 'artigos',
-		'inc'   => 'inciso',
-		'par'   => 'parágrafo',
 		'séc'   => 'século',
-		'sec'   => 'século',
 		'pág'   => 'página',
 		'pag'   => 'página',
 		'págs'  => 'páginas',
-		'p'     => 'página',
-		'pp'    => 'páginas',
 		'vol'   => 'volume',
 		'vols'  => 'volumes',
-		'ed'    => 'edição',
-		'obs'   => 'observação',
-		'ref'   => 'referência',
 		'tel'   => 'telefone',
 		'cx'    => 'caixa',
 		'nº'    => 'número',
-		'no'    => 'número',
 		'num'   => 'número',
 		'fl'    => 'folha',
 		'fls'   => 'folhas',
-		'doc'   => 'documento',
-		'docs'  => 'documentos',
 		'aprox' => 'aproximadamente',
 		'etc'   => 'etcétera',
-		'ex'    => 'exemplo',
-		'min'   => 'minutos',
-		'dep'   => 'departamento',
 		'ltda'  => 'limitada',
 		'cia'   => 'companhia',
-		'univ'  => 'universidade',
-		'fund'  => 'fundação',
-		'inst'  => 'instituto',
-		'assoc' => 'associação',
-		'org'   => 'organização',
-		'hosp'  => 'hospital',
 		'oms'   => 'o m s',
 		'uti'   => 'u t i',
 		'ibge'  => 'i b g e',
@@ -141,20 +125,35 @@ final class SpeechText {
 	);
 
 	/**
-	 * Abbreviations only expanded when followed by a dot (short tokens that
-	 * are also ordinary words: "p.", "r.", "no.", "ex.", "ed.").
+	 * Abbreviations only expanded when followed by a dot ("Pe. José", "Av. Paulista").
 	 *
 	 * @var string[]
 	 */
-	private const DOT_ONLY = array( 'p', 'pp', 'r', 'no', 'ex', 'ed', 'min', 'cap', 'ten', 'par', 'inc', 'ref', 'obs', 'sec', 'cx', 'fl', 'fls', 'pe', 'fr', 'gen', 'cel', 'sgt', 'av', 'rod', 'trav', 'vol', 'vols', 'doc', 'docs', 'dep', 'org', 'fund', 'inst', 'assoc', 'univ', 'hosp', 'cia', 'eng', 'enga', 'num', 'art', 'arts' );
+	private const DOT_ONLY = array( 'eng', 'enga', 'ten', 'gen', 'cel', 'sgt', 'pe', 'fr', 'av', 'pç', 'trav', 'rod', 'séc', 'cia', 'num', 'art', 'arts', 'pág', 'pag', 'págs', 'vol', 'vols', 'tel', 'cx', 'fl', 'fls' );
 
 	/**
-	 * Codes expanded only when written in capitals as a standalone token
-	 * (state codes, institutions).
+	 * Abbreviations that additionally require a number right after them
+	 * ("art. 5", "fl. 12", "vol. 3"); without it they stay as written.
 	 *
 	 * @var string[]
 	 */
-	private const UPPER_ONLY = array( 'sp', 'rj', 'mg', 'rs', 'pr', 'sc', 'ba', 'ce', 'df', 'go', 'es', 'pa', 'am', 'ma', 'pb', 'rn', 'al', 'se', 'pi', 'mt', 'to', 'ro', 'ac', 'ap', 'rr', 'oms', 'uti', 'ibge', 'ufba', 'ufmg' );
+	private const NUMERIC_CONTEXT = array( 'art', 'arts', 'pág', 'pag', 'págs', 'vol', 'vols', 'tel', 'cx', 'fl', 'fls', 'num' );
+
+	/**
+	 * Codes expanded only when written in capitals as a standalone token.
+	 *
+	 * @var string[]
+	 */
+	private const UPPER_ONLY = array( 'sp', 'rj', 'mg', 'rs', 'sc', 'ba', 'ce', 'df', 'pb', 'rn', 'pi', 'mt', 'ap', 'rr', 'pr', 'go', 'es', 'pa', 'am', 'ma', 'al', 'se', 'to', 'ro', 'ac', 'oms', 'uti', 'ibge', 'ufba', 'ufmg' );
+
+	/**
+	 * State codes that are also ordinary words in capitals ("SE", "AM", "TO",
+	 * "PA"…): expanded only in a place context — after "(", "-", "–" or "/",
+	 * as in "Belém (PA)" or "Aracaju - SE".
+	 *
+	 * @var string[]
+	 */
+	private const STATE_NEEDS_CONTEXT = array( 'pr', 'go', 'es', 'pa', 'am', 'ma', 'al', 'se', 'to', 'ro', 'ac' );
 
 	/**
 	 * Two-letter abbreviations expanded even without a dot.
@@ -184,7 +183,7 @@ final class SpeechText {
 		}
 		$out = array();
 		foreach ( $paragraphs as $paragraph ) {
-			$paragraph = trim( (string) preg_replace( '/\s*\n\s*/u', ' ', $paragraph ) );
+			$paragraph = trim( $paragraph );
 			if ( '' === $paragraph ) {
 				continue;
 			}
@@ -230,8 +229,12 @@ final class SpeechText {
 			$protected
 		) ?? $protected;
 		$protected = preg_replace( '/(\p{N})\.(?=\p{N})/u', '$1' . $mark, $protected ) ?? $protected;
+		// Enumerators at line start ("58. É sufocante…") belong to their sentence.
+		$protected = preg_replace( '/(^|\n)(\s*\d{1,3})\.(?=\s)/u', '$1$2' . $mark, $protected ) ?? $protected;
 
-		$parts = preg_split( '/(?:(?<=[\.\!\?…])|(?<=[\.\!\?…]["”’\)\]]))\s+(?=["“‘\(\[]?[\p{Lu}\p{N}])/u', $protected );
+		// A line break that survived Normalizer::unwrap_lines() is a deliberate
+		// boundary (title line, list item, signature): treat it as a sentence end.
+		$parts = preg_split( '/(?:(?<=[\.\!\?…])|(?<=[\.\!\?…]["”’\)\]]))\s+(?=["“‘\(\[]?[\p{Lu}\p{N}])|\s*\n\s*/u', $protected );
 		if ( false === $parts ) {
 			$parts = array( $protected );
 		}
@@ -266,6 +269,8 @@ final class SpeechText {
 		}
 
 		// Roman numerals after "século", "capítulo", "Dom", proper names ("Pedro II").
+		// After a name the numeral must have 2+ letters and be a plausible regnal
+		// number (≤ 40): a single "L." or "C." after a surname is an initial.
 		$t = preg_replace_callback(
 			'/\b(século|séc\.|capítulo|cap\.|volume|vol\.|tomo|parte|livro|título|artigo|Dom|D\.|Papa|Rei|Rainha|\p{Lu}\p{Ll}{2,})\s+([IVXLCDMivxlcdm]{1,7})\b(?!\.\p{L})/u',
 			static function ( array $m ): string {
@@ -276,8 +281,8 @@ final class SpeechText {
 				}
 				$context   = mb_strtolower( $m[1] );
 				$is_person = ! in_array( $context, array( 'século', 'séc.', 'capítulo', 'cap.', 'volume', 'vol.', 'tomo', 'parte', 'livro', 'título', 'artigo' ), true );
-				if ( $is_person && $m[2] !== $numeral ) {
-					return $m[0]; // Lowercase "vi"/"mi" after a name is a word, not a numeral.
+				if ( $is_person && ( $m[2] !== $numeral || strlen( $numeral ) < 2 || $value > 40 ) ) {
+					return $m[0];
 				}
 				$words = ( $is_person && $value <= 10 ) ? self::ordinal_words( $value, false ) : self::cardinal_words( $value );
 				return $m[1] . ' ' . $words;
@@ -296,6 +301,56 @@ final class SpeechText {
 		// URLs and e-mails are unreadable aloud.
 		$t = preg_replace( '~(?:https?://|www\.)[^\s]+~iu', 'endereço eletrônico', $t ) ?? $t;
 		$t = preg_replace( '/[\p{L}\p{N}._%+\-]+@[\p{L}\p{N}.\-]+\.\p{L}{2,}/u', 'endereço de e-mail', $t ) ?? $t;
+
+		// Abbreviations. Single letters are never expanded (name initials such as
+		// "V. S. R." must stay letters); ambiguous forms need a dot, a number or a
+		// place context — see the constants above.
+		$subject = $t;
+		$t       = preg_replace_callback(
+			'/(?<![\p{L}\p{N}])([\p{L}º]{2,7})(\.)?(?![\p{L}])(?=(\s*\d)?)/u',
+			static function ( array $m ) use ( $subject ): string {
+				$raw    = $m[1][0];
+				$offset = (int) $m[1][1];
+				$lower  = mb_strtolower( $raw );
+				$dot    = isset( $m[2] ) && '.' === $m[2][0];
+				$upper  = mb_strtoupper( $raw ) === $raw;
+				$number = isset( $m[3] ) && '' !== $m[3][0];
+				if ( ! isset( self::ABBREVIATIONS[ $lower ] ) ) {
+					return $m[0][0];
+				}
+				if ( in_array( $lower, self::UPPER_ONLY, true ) ) {
+					if ( ! $upper || $dot ) {
+						return $m[0][0];
+					}
+					if ( in_array( $lower, self::STATE_NEEDS_CONTEXT, true ) ) {
+						$before = trim( substr( $subject, max( 0, $offset - 3 ), $offset - max( 0, $offset - 3 ) ) );
+						if ( '' === $before || ! preg_match( '/[\(\-–\/]$/u', $before ) ) {
+							return $m[0][0];
+						}
+					}
+					return self::ABBREVIATIONS[ $lower ];
+				}
+				if ( in_array( $lower, self::DOT_ONLY, true ) && ! $dot ) {
+					return $m[0][0];
+				}
+				if ( in_array( $lower, self::NUMERIC_CONTEXT, true ) && ! $number ) {
+					return $m[0][0];
+				}
+				if ( ! $dot && mb_strlen( $raw ) <= 2 && ! in_array( $lower, self::SHORT_ALWAYS, true ) ) {
+					return $m[0][0];
+				}
+				$word  = self::ABBREVIATIONS[ $lower ];
+				$first = mb_substr( $raw, 0, 1 );
+				if ( mb_strtoupper( $first ) === $first && $lower !== $raw ) {
+					$word = mb_strtoupper( mb_substr( $word, 0, 1 ) ) . mb_substr( $word, 1 );
+				}
+				return $word;
+			},
+			$t,
+			-1,
+			$count,
+			PREG_OFFSET_CAPTURE
+		) ?? $t;
 
 		// Dates.
 		$t = preg_replace_callback(
@@ -320,8 +375,8 @@ final class SpeechText {
 		$t = preg_replace( '/\b(\d{1,2})[h:](\d{2})\b/u', '$1 horas e $2 minutos', $t ) ?? $t;
 		$t = preg_replace( '/\b(\d{1,2})h\b/u', '$1 horas', $t ) ?? $t;
 
-		// Ranges: 2020-2021 → 2020 a 2021.
-		$t = preg_replace( '/\b(\d{3,4})\s*[-–]\s*(\d{3,4})\b/u', '$1 a $2', $t ) ?? $t;
+		// Year ranges: 2020-2021 → 2020 a 2021 (years only; phone numbers stay).
+		$t = preg_replace( '/\b(1\d{3}|20\d{2})\s*[-–]\s*(1\d{3}|20\d{2})\b/u', '$1 a $2', $t ) ?? $t;
 		// Hyphenated codes: COVID-19, SARS-CoV-2 → spaces (never "minus").
 		$t = preg_replace( '/(?<=[\p{L}\p{N}])-(?=\p{N})|(?<=\p{N})-(?=\p{L})/u', ' ', $t ) ?? $t;
 		// Thousands separators: 1.234.567 → 1234567.
@@ -355,36 +410,6 @@ final class SpeechText {
 		$t = preg_replace( '/(?<=\p{L})\/(?=\p{L})/u', ' ou ', $t ) ?? $t;
 		$t = preg_replace( '/(?<=\p{N})\/(?=\p{N})/u', ' barra ', $t ) ?? $t;
 		$t = str_replace( array( '§', '&', '+', '=' ), array( ' parágrafo ', ' e ', ' mais ', ' igual a ' ), $t );
-
-		// Abbreviations.
-		$t = preg_replace_callback(
-			'/(?<![\p{L}\p{N}])([\p{L}º]{1,7})(\.)?(?![\p{L}])/u',
-			static function ( array $m ): string {
-				$raw   = $m[1];
-				$lower = mb_strtolower( $raw );
-				$dot   = isset( $m[2] ) && '.' === $m[2];
-				$upper = mb_strtoupper( $raw ) === $raw && mb_strlen( $raw ) >= 2;
-				if ( ! isset( self::ABBREVIATIONS[ $lower ] ) ) {
-					return $m[0];
-				}
-				if ( in_array( $lower, self::UPPER_ONLY, true ) ) {
-					return $upper ? self::ABBREVIATIONS[ $lower ] : $m[0];
-				}
-				if ( in_array( $lower, self::DOT_ONLY, true ) && ! $dot ) {
-					return $m[0];
-				}
-				if ( ! $dot && mb_strlen( $raw ) <= 2 && ! in_array( $lower, self::SHORT_ALWAYS, true ) ) {
-					return $m[0];
-				}
-				$word  = self::ABBREVIATIONS[ $lower ];
-				$first = mb_substr( $raw, 0, 1 );
-				if ( mb_strtoupper( $first ) === $first && $lower !== $raw ) {
-					$word = mb_strtoupper( mb_substr( $word, 0, 1 ) ) . mb_substr( $word, 1 );
-				}
-				return $word;
-			},
-			$t
-		) ?? $t;
 
 		// Long ALL-CAPS words are spelled by some engines: lowercase them.
 		$t = preg_replace_callback(

@@ -148,6 +148,12 @@ final class Diagnostics {
 		switch ( $id ) {
 			case 'openai':
 				return 'https://api.openai.com/v1';
+			case 'claude':
+				return 'https://api.anthropic.com/v1';
+			case 'groq':
+				return 'https://api.groq.com/openai/v1';
+			case 'deepseek':
+				return 'https://api.deepseek.com/v1';
 			case 'gemini':
 				return 'https://generativelanguage.googleapis.com';
 			case 'ollama':

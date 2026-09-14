@@ -110,6 +110,54 @@ sentenças repetidas, ordem de leitura preservada) e `MetadataPhraser` (rótulo 
 frase: "Autoria" → "De autoria de X."). O modo `faithful` continua literal
 (`limit_words` + "Rótulo: valor.").
 
+### Fidelidade — nada de invenção (v1.2.0)
+
+Reclamação real: a narração citava fatos que não estavam no item. Três fontes
+foram encontradas e todas têm defesa em código, não só em prompt:
+
+1. **IA.** `NarrativeGenerator::generate()` passa o script por
+   `FaithfulnessChecker` (construído com o corpus ORIGINAL, anexos incluídos):
+   números com 2+ dígitos ausentes das fontes, nomes próprios (maiúscula fora
+   do início de frase) cujo radical (5 letras, sem acento) não ocorre nas
+   fontes, e frases com < 34% de palavras de conteúdo apoiadas e nenhum
+   nome/número apoiado. Se reprovar: 1 chamada corretiva
+   (`prompts/faithfulness-fix.php`) → nova checagem → `strip()` remove as
+   frases reprovadas → se sobrarem < 25 palavras, `WP_Error('tn_ai_unfaithful')`
+   (não-retryable) e o `NarrativeManager` cai para o template, gravando
+   `stats.ai_unfaithful` (o coverage sweep NÃO regenera esses). Tudo fica em
+   `stats.faithfulness`; `GET /items/{id}/faithfulness` refaz a checagem sobre
+   o roteiro final (útil após edição humana) e o admin mostra o painel
+   "Fidelidade" em Fontes e saúde. Prompts: "regra zero" no system, `{brevity}`
+   para fontes < 1500 chars (alvo 120 palavras, sem dossiê).
+2. **Fala.** `SpeechText` só expande abreviações inequívocas; tokens de 1 letra
+   nunca (iniciais "V. S. R."); `NUMERIC_CONTEXT` exige número após
+   art./fl./vol./pág.; `STATE_NEEDS_CONTEXT` exige "(", "-" ou "/" antes de
+   SE/AM/TO/PA/…; romanos após sobrenome só com 2+ letras e ≤ 40. Ao adicionar
+   uma abreviação, pergunte "isto pode ser inicial, sigla ou palavra?" — se sim,
+   não entra.
+3. **Template.** `MetadataPhraser` só usa frases que reafirmam o rótulo
+   ("Local registrado: X"); nada de "está situado em"/"vem de".
+
+**Duração:** `Options max_words` (280 ≈ 2 min) é teto universal via
+`Modes::target_words_for()`; IA acima do teto é condensada por
+`ExtractiveSummarizer` (frases originais), nunca reescrita.
+
+### Provedores de IA (v1.2.0 — padrão Oráculo Tainacan)
+
+`AI\ProviderManager::SETTINGS` mapeia provedor → opções (`key`, `url`, `model`,
+`key_link`, `free_model`). Cada provedor tem `catalog()` (lista estática
+espelhada do Oráculo) e `list_models()` (remoto). `make($id, $overrides)` cria
+instância com chave/URL/modelo ainda não salvos — é o que `POST
+/providers/models` e `/providers/test` usam ("Buscar modelos da conta" antes de
+salvar). Chaves: `openai_api_key` (com fallback legado para `ai_api_key`),
+`claude_api_key`, `gemini_api_key`, `groq_api_key`, `deepseek_api_key`;
+constantes `TN_*_API_KEY` em `Options::SECRET_CONSTANTS`. `openai_compatible`
+continua usando `ai_base_url`/`ai_model`/`ai_api_key`. OpenAI/GPT-5 e o-series:
+`max_completion_tokens` e sem temperature (`OpenAICompatibleProvider::build_body`
++ fallback por mensagem de erro). A aba IA (`tab-ai.php`) renderiza cards
+(radio) + um painel por provedor a partir de `ui_providers()`; o JS
+(`fetch-models`, `test-provider`) lê chave/URL/modelo do painel visível.
+
 ### Cobertura automática (v1.1.0)
 
 `QueueManager::cron_coverage()` (hook `tn_coverage_sweep`, horário, opções
@@ -205,6 +253,11 @@ continua valendo — cobertura acontece na fila.
   `review_tainacan_narratives`; REST público nunca usa `__return_true`.
 - `Deactivator` limpa cron e lock; `uninstall.php` só apaga dados se
   `delete_on_uninstall` estiver marcado.
+- **Nenhum texto de IA é publicado sem passar pelo `FaithfulnessChecker`**
+  (ver seção "Fidelidade"). Não adicione caminhos que gravem
+  `generated_script` vindo de IA fora de `NarrativeGenerator::generate()`.
+- **Nenhuma narração ultrapassa `max_words`** — todo caminho de roteiro passa
+  por `Modes::target_words_for()`.
 
 ## Máquina de estados (`wp_tn_narratives.status`)
 

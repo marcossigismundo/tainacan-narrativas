@@ -64,6 +64,20 @@ final class WordPressAIProvider implements AIProviderInterface {
 	/**
 	 * {@inheritDoc}
 	 */
+	public function description(): string {
+		return __( 'Usa os conectores de IA configurados no próprio WordPress (Configurações → IA). Nenhuma chave é armazenada por este plugin.', 'tainacan-narrativas' );
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public function catalog(): array {
+		return array();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public function is_configured(): bool {
 		if ( ! self::is_available() ) {
 			return false;

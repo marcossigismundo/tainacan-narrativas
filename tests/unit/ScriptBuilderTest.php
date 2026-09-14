@@ -32,11 +32,13 @@ final class ScriptBuilderTest extends TestCase {
 	}
 
 	public function test_template_build_drops_empty_placeholders_and_respects_target_words(): void {
-		$b      = new ScriptBuilder();
+		$GLOBALS['tn_test_options']['tn_settings'] = array( 'max_words' => 2000 ); // Room for the attachment in faithful mode.
+		\TainacanNarrativas\Core\Options::flush();
+		$b = new ScriptBuilder();
 		$script = $b->build( $this->corpus(), 'summary' );
 		$this->assertStringContainsString( 'Você está ouvindo o registro "Carta de 1918".', $script );
 		$this->assertStringContainsString( 'De autoria de Maria Silva.', $script );
-		$this->assertStringContainsString( 'O registro data de 12 de outubro de 1918.', $script );
+		$this->assertStringContainsString( 'Data registrada: 12 de outubro de 1918.', $script );
 		$this->assertStringNotContainsString( 'Vazio', $script );
 		$this->assertStringNotContainsString( '{', $script );
 		$this->assertStringContainsString( 'Consulte a página do item', $script ); // truncated → closing line
@@ -46,6 +48,17 @@ final class ScriptBuilderTest extends TestCase {
 		$this->assertStringContainsString( 'Autoria: Maria Silva.', $faithful );
 		$this->assertGreaterThan( \TainacanNarrativas\Narrative\Normalizer::word_count( $script ), \TainacanNarrativas\Narrative\Normalizer::word_count( $faithful ) );
 		$this->assertStringContainsString( 'Anexo 1, anexo final, TXT:', $faithful );
+	}
+
+	public function test_whole_script_respects_the_duration_cap(): void {
+		$GLOBALS['tn_test_options']['tn_settings'] = array( 'max_words' => 100 );
+		\TainacanNarrativas\Core\Options::flush();
+		$b = new ScriptBuilder();
+		foreach ( array( 'documentary', 'faithful', 'detailed' ) as $mode ) {
+			$script = $b->build( $this->corpus(), $mode );
+			$this->assertLessThanOrEqual( 110, \TainacanNarrativas\Narrative\Normalizer::word_count( $script ), $mode );
+			$this->assertStringContainsString( 'Carta de 1918', $script, $mode );
+		}
 	}
 
 	public function test_custom_template_is_used(): void {

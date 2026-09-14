@@ -29,7 +29,7 @@ final class SourceHasher {
 	/**
 	 * Bump when prompts/templates change in a way that should invalidate scripts.
 	 */
-	public const PROMPT_VERSION = '2';
+	public const PROMPT_VERSION = '3';
 
 	/**
 	 * Source hash.

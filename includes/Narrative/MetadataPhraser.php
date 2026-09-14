@@ -25,20 +25,24 @@ final class MetadataPhraser {
 	 * @var array<string,string>
 	 */
 	private const PATTERNS = array(
-		'/^(autor|autoria|autores|criador|criadores|creator|author|produtor|produtora|produção|realização|responsável|responsavel|entrevistad[oa]|depoente|narrador|redator|fotógraf[oa]|fotografo|artista|compositor|organizador|coordenação|coordenador)\b/u' => 'De autoria de %s.',
-		'/^(colaborador|colaboradores|contributor|participantes?|equipe)\b/u' => 'Com a participação de %s.',
-		'/^(data|date|datas?|data de (criação|produção|publicação|registro|coleta|emissão)|ano|período|periodo|época|epoca|quando)\b/u' => 'O registro data de %s.',
-		'/^(local|lugar|localidade|cidade|município|municipio|estado|país|pais|região|regiao|cobertura espacial|spatial|place|location|onde|procedência|procedencia|origem)\b/u' => 'Está situado em %s.',
-		'/^(assunto|assuntos|tema|temas|temática|palavras?-chave|palavras chave|keywords?|subject|tags?|categoria|categorias|descritores?)\b/u' => 'Trata de %s.',
-		'/^(tipo|tipologia|type|gênero|genero|natureza|espécie documental|formato|format|suporte|material|técnica|tecnica)\b/u' => 'É um registro do tipo %s.',
-		'/^(idioma|língua|lingua|language)\b/u'            => 'Está em %s.',
-		'/^(editor|editora|publisher|publicação|publicado por|veículo|veiculo|fonte|source|jornal|revista|órgão|orgao|instituição|instituicao|entidade|acervo de origem|custodiador|custódia)\b/u' => 'Vem de %s.',
-		'/^(direitos|licença|licenca|rights|license|uso)\b/u' => 'Quanto aos direitos de uso: %s.',
-		'/^(identificador|identifier|código|codigo|número de registro|numero de registro|tombo|referência|referencia|notação|notacao)\b/u' => 'Seu identificador é %s.',
-		'/^(dimens|extensão|extensao|duração|duracao|tamanho|páginas|paginas|folhas)/u' => 'Tem %s.',
-		'/^(descrição física|descricao fisica|estado de conservação|conservação|condição)/u' => 'Sobre sua condição física: %s.',
+		// Only phrasings that restate the field's own meaning; anything that
+		// would interpret the value ("está situado em", "vem de") is avoided
+		// because it can assert something the item never said.
+		'/^(autor|autoria|autores|criador|criadores|creator|author)\b/u' => 'De autoria de %s.',
+		'/^(produtor|produtora|produção|realização)\b/u'   => 'Produção de %s.',
+		'/^(entrevistad[oa]|depoente)\b/u'                 => 'Depoimento de %s.',
+		'/^(fotógraf[oa]|fotografo)\b/u'                   => 'Fotografia de %s.',
+		'/^(colaborador|colaboradores|contributor)\b/u'    => 'Colaboração de %s.',
+		'/^(data|date|datas?|data de (criação|produção|publicação|registro|coleta|emissão)|ano|período|periodo|época|epoca)\b/u' => 'Data registrada: %s.',
+		'/^(local|lugar|localidade|cidade|município|municipio|estado|país|pais|região|regiao|cobertura espacial|spatial|place|location|procedência|procedencia|origem)\b/u' => 'Local registrado: %s.',
+		'/^(assunto|assuntos|tema|temas|temática|palavras?-chave|palavras chave|keywords?|subject|tags?|categoria|categorias|descritores?)\b/u' => 'Assuntos: %s.',
+		'/^(tipo|tipologia|type|gênero|genero|natureza|espécie documental)\b/u' => 'Tipo de documento: %s.',
+		'/^(formato|format|suporte|material|técnica|tecnica)\b/u' => 'Formato: %s.',
+		'/^(idioma|língua|lingua|language)\b/u'            => 'Idioma: %s.',
+		'/^(direitos|licença|licenca|rights|license)\b/u'  => 'Direitos de uso: %s.',
+		'/^(identificador|identifier|código|codigo|número de registro|numero de registro|tombo|notação|notacao)\b/u' => 'Identificador: %s.',
 		'/^(resumo|sinopse|abstract|âmbito e conteúdo|ambito e conteudo|conteúdo|conteudo|nota|notas|observações|observacoes|histórico|historico|história|historia|contexto|biografia|comentário|comentario|transcrição|transcricao|legenda|depoimento|relato)\b/u' => '%s',
-		'/^(relacionad|ver também|ver tambem|relation|item relacionado|documentos relacionados)/u' => 'Relaciona-se com %s.',
+		'/^(relacionad|ver também|ver tambem|relation|item relacionado|documentos relacionados)/u' => 'Item relacionado: %s.',
 		'/^(url|link|endereço|site|website|permalink)\b/u' => '',
 	);
 

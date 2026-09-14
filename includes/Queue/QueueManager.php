@@ -126,7 +126,7 @@ final class QueueManager {
 			$summary['skipped'] = true;
 			return $summary;
 		}
-		if ( function_exists( 'set_time_limit' ) && ! ini_get( 'safe_mode' ) ) {
+		if ( function_exists( 'set_time_limit' ) ) {
 			// phpcs:ignore Squiz.PHP.DiscouragedFunctions.Discouraged -- Queue worker: one job chains several AI/TTS HTTP calls (up to ai_timeout + tts_timeout each) and a host default of 30 s would kill it mid-way, leaving the item locked for 15 min; the run is still bounded by the time budget, the batch size and the queue lock.
 			set_time_limit( max( 600, $budget + (int) Options::get( 'ai_timeout', 180 ) * 3 + (int) Options::get( 'tts_timeout', 180 ) ) );
 		}

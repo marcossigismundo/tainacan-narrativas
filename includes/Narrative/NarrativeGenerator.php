@@ -1,6 +1,6 @@
 <?php
 /**
- * AI-assisted script generation (reduce → analyse → write → clean).
+ * AI-assisted script generation (reduce → analyse → write → verify → clean).
  *
  * @package TainacanNarrativas
  */
@@ -23,14 +23,19 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  *  1. reduce  — documents longer than the chunk size are reduced chunk by
  *               chunk (faithful reductions, cached in transients) and
- *               consolidated, so the whole PDF reaches the writer, not just
- *               its first pages;
- *  2. analyse — the model reads every source and writes a working dossier
- *               (type, people, timeline, literal passages, narrative thread);
+ *               consolidated, so the whole PDF reaches the writer;
+ *  2. analyse — the model reads every source and writes a working dossier;
  *  3. write   — the mode prompt receives dossier + sources and produces the
- *               narration;
- *  4. clean   — markdown, leaked delimiters and machine-sounding formulas are
- *               removed deterministically.
+ *               narration within the duration cap (Modes::target_words_for);
+ *  4. verify  — FaithfulnessChecker compares every sentence with the item's
+ *               own sources. Unsupported names/numbers/claims trigger ONE
+ *               corrective call; whatever is still unsupported is removed
+ *               deterministically. If too little survives, the AI result is
+ *               rejected (`tn_ai_unfaithful`) and the manager falls back to
+ *               the template script, which is faithful by construction;
+ *  5. clean   — markdown, leaked delimiters and machine formulas removed;
+ *               over-length scripts are condensed extractively (never
+ *               rewritten) to the word cap.
  */
 final class NarrativeGenerator {
 
@@ -40,10 +45,20 @@ final class NarrativeGenerator {
 	private const CACHE_TTL = 7 * DAY_IN_SECONDS;
 
 	/**
-	 * Corpora smaller than this skip the analysis call (the writer can hold
-	 * the whole thing in view anyway).
+	 * Corpora smaller than this skip the analysis call.
 	 */
 	private const ANALYSIS_MIN_CHARS = 1200;
+
+	/**
+	 * Sources shorter than this get a "brief literal summary" instruction and
+	 * a tighter word budget.
+	 */
+	private const THIN_SOURCES_CHARS = 1500;
+
+	/**
+	 * Minimum surviving words for an AI script to be accepted.
+	 */
+	private const MIN_WORDS = 25;
 
 	/**
 	 * Openers/connectors typical of machine-written text, removed when they
@@ -97,23 +112,28 @@ final class NarrativeGenerator {
 	 * @param array<string,mixed> $corpus   Corpus.
 	 * @param array<string,mixed> $config   Effective config (mode, language, chunk_size, external_ai_attachments).
 	 * @param AIProviderInterface $provider Provider.
-	 * @return array{script:string,model:string,stats:array<string,int|string>}|WP_Error
+	 * @return array{script:string,model:string,stats:array<string,mixed>}|WP_Error
 	 */
 	public function generate( array $corpus, array $config, AIProviderInterface $provider ) {
 		$mode     = Modes::sanitize( $config['mode'] ?? 'documentary' );
-		$def      = Modes::get( $mode );
 		$language = (string) ( $config['language'] ?? 'pt-BR' );
 		$chunk    = max( 1500, (int) ( $config['chunk_size'] ?? 6000 ) );
-		$target   = (int) ( $def['target_words'] ?? 600 ) > 0 ? (int) $def['target_words'] : 1200;
-		$stats    = array(
+		$target   = Modes::target_words_for( $mode );
+		$thin     = ContentScore::score( $corpus )['chars'] < self::THIN_SOURCES_CHARS;
+		if ( $thin ) {
+			$target = min( $target, 120 );
+		}
+		$stats = array(
 			'ai_calls'          => 0,
 			'chunks'            => 0,
 			'analysis'          => 0,
 			'prompt_tokens'     => 0,
 			'completion_tokens' => 0,
 			'chars_in'          => 0,
+			'target_words'      => $target,
+			'thin_sources'      => $thin ? 1 : 0,
 		);
-		$model    = $provider->model();
+		$model = $provider->model();
 
 		// Privacy: attachments may be excluded from external AI per collection.
 		$send_attachments = ! $provider->is_external() || ! empty( $config['external_ai_attachments'] );
@@ -134,38 +154,98 @@ final class NarrativeGenerator {
 
 		// 2. Dossier: forces a full reading before writing.
 		$analysis_block = '';
-		if ( Options::is( 'ai_analysis' ) && mb_strlen( $sources ) >= self::ANALYSIS_MIN_CHARS ) {
+		if ( ! $thin && Options::is( 'ai_analysis' ) && mb_strlen( $sources ) >= self::ANALYSIS_MIN_CHARS ) {
 			$dossier = $this->analyse( $working, $sources, $system, $provider, $stats, $model );
 			if ( is_wp_error( $dossier ) ) {
 				return $dossier;
 			}
 			if ( '' !== $dossier ) {
-				$analysis_block = "LEITURA PRÉVIA DAS FONTES (dossiê de trabalho; use-o para não esquecer nada, mas escreva a narração a partir das fontes):\n" . $dossier . "\n";
+				$analysis_block = "LEITURA PRÉVIA DAS FONTES (dossiê de trabalho; use-o para não esquecer nada, mas escreva a narração a partir das fontes e nunca acrescente o que não estiver nelas):\n" . $dossier . "\n";
 			}
 		}
 
 		// 3. Write.
-		$user               = PromptLoader::mode(
-			$mode,
-			array(
-				'target_words' => $target,
-				'title'        => (string) $working['title'],
-				'collection'   => (string) $working['collection_name'],
-				'language'     => $language,
-				'analysis'     => $analysis_block,
-				'sources'      => $sources,
-			)
+		$vars = array(
+			'target_words' => $target,
+			'title'        => (string) $working['title'],
+			'collection'   => (string) $working['collection_name'],
+			'language'     => $language,
+			'analysis'     => $analysis_block,
+			'brevity'      => $thin ? "\nFONTES CURTAS: há pouca informação neste registro. Faça um resumo breve e literal, em três a seis frases, dizendo apenas o que as fontes registram. Não desenvolva, não contextualize, não descreva nada que não esteja escrito.\n" : '',
+			'sources'      => $sources,
 		);
-		$stats['chars_in'] += mb_strlen( $user );
+		$user = PromptLoader::mode( $mode, $vars );
 
-		$result = $this->call( $provider, $system, $user, $stats, $model, $this->max_tokens_for( $target ) );
+		$stats['chars_in'] += mb_strlen( $user );
+		$result             = $this->call( $provider, $system, $user, $stats, $model, $this->max_tokens_for( $target ) );
 		if ( is_wp_error( $result ) ) {
 			return $result;
 		}
 		$script = $this->post_process( $result );
-		if ( mb_strlen( $script ) < 40 || Normalizer::word_count( $script ) < 25 ) {
+		if ( Normalizer::word_count( $script ) < self::MIN_WORDS ) {
 			return new WP_Error( 'tn_ai_malformed', __( 'A IA devolveu um roteiro vazio ou inutilizável.', 'tainacan-narrativas' ) );
 		}
+
+		// 4. Verify against the ORIGINAL sources (attachments included, this is local).
+		$checker = new FaithfulnessChecker( $corpus );
+		$report  = $checker->check( $script );
+		$faith   = array(
+			'checked'     => 1,
+			'total'       => $report['total'],
+			'flagged'     => $report['flagged'],
+			'retried'     => 0,
+			'removed'     => 0,
+			'unsupported' => array_slice( $report['unsupported'], 0, 20 ),
+		);
+		if ( ! $report['ok'] ) {
+			$faith['retried']   = 1;
+			$fix                = PromptLoader::fill(
+				PromptLoader::load( 'faithfulness-fix' ),
+				array(
+					'title'        => (string) $working['title'],
+					'script'       => $script,
+					'unsupported'  => implode( ', ', array_slice( $report['unsupported'], 0, 20 ) ),
+					'target_words' => $target,
+					'sources'      => $sources,
+				)
+			);
+			$stats['chars_in'] += mb_strlen( $fix );
+			$retry              = $this->call( $provider, $system, $fix, $stats, $model, $this->max_tokens_for( $target ) );
+			if ( ! is_wp_error( $retry ) ) {
+				$candidate = $this->post_process( $retry );
+				if ( Normalizer::word_count( $candidate ) >= self::MIN_WORDS ) {
+					$script = $candidate;
+					$report = $checker->check( $script );
+				}
+			}
+			if ( ! $report['ok'] ) {
+				$stripped                   = $checker->strip( $script );
+				$script                     = $stripped['script'];
+				$faith['removed']           = count( $stripped['removed'] );
+				$faith['removed_sentences'] = array_slice( $stripped['removed'], 0, 10 );
+				$faith['unsupported']       = array_slice( $stripped['unsupported'], 0, 20 );
+				Logger::warning(
+					'Faithfulness check removed sentences',
+					array(
+						'item'        => (int) ( $corpus['item_id'] ?? 0 ),
+						'removed'     => $faith['removed'],
+						'unsupported' => $faith['unsupported'],
+					)
+				);
+			}
+		}
+		$stats['faithfulness'] = $faith;
+		if ( Normalizer::word_count( $script ) < self::MIN_WORDS ) {
+			return new WP_Error( 'tn_ai_unfaithful', __( 'A IA produziu texto sem apoio nas fontes do item; o roteiro documental por template será usado.', 'tainacan-narrativas' ) );
+		}
+
+		// 5. Duration cap: condense extractively, never rewrite.
+		$words = Normalizer::word_count( $script );
+		if ( $words > $target ) {
+			$script                = ExtractiveSummarizer::summarize( $script, $target );
+			$stats['trimmed_from'] = $words;
+		}
+
 		return array(
 			'script' => $script,
 			'model'  => $model,
@@ -205,7 +285,6 @@ final class NarrativeGenerator {
 		$stats['chars_in'] += mb_strlen( $user );
 		$result             = $this->call( $provider, $system, $user, $stats, $model, $this->max_tokens_for( 1200 ) );
 		if ( is_wp_error( $result ) ) {
-			// The dossier is an enhancement: a retryable outage bubbles up, anything else degrades gracefully.
 			return in_array( $result->get_error_code(), array( 'tn_ai_retryable', 'tn_locked' ), true ) ? $result : '';
 		}
 		$dossier = trim( $this->strip_markup( $result ) );
@@ -306,15 +385,14 @@ final class NarrativeGenerator {
 	}
 
 	/**
-	 * Output budget for a target length (pt-BR ≈ 2.2 tokens/word + margin),
-	 * never below the configured maximum.
+	 * Output budget for a target length (pt-BR ≈ 2.4 tokens/word + margin).
 	 *
 	 * @param int $words Target words.
 	 * @return int
 	 */
 	private function max_tokens_for( int $words ): int {
 		$configured = (int) Options::get( 'ai_max_tokens', 4000 );
-		return max( $configured, (int) ceil( $words * 2.4 ) + 400 );
+		return max( min( $configured, 4000 ), (int) ceil( $words * 2.4 ) + 400 );
 	}
 
 	/**
@@ -357,22 +435,17 @@ final class NarrativeGenerator {
 	 */
 	private function strip_markup( string $text ): string {
 		$text = str_replace( array( "\r\n", "\r" ), "\n", $text );
-		// Drop a leading label ("Narrativa:", "Roteiro:", "Texto:") or chat preamble ("Claro! Aqui está…").
 		$text = preg_replace( '/^\s*(narrativa|roteiro|texto|script|narração|dossiê)\s*:\s*/iu', '', $text ) ?? $text;
 		$text = preg_replace( '/^\s*(claro|certo|ok|perfeito|com certeza|segue|aqui está|aqui vai)[^\n]{0,80}:\s*\n+/iu', '', $text ) ?? $text;
-		// Reasoning blocks some local models emit.
 		$text = preg_replace( '/<think>.*?<\/think>/isu', '', $text ) ?? $text;
-		// Leaked SOURCE delimiters or lines that only contain them.
 		$text = preg_replace( '/^.*<<<\s*(END_)?SOURCE.*$/mu', '', $text ) ?? $text;
-		// Code fences, headings, emphasis, bullets.
 		$text = preg_replace( '/^```[a-z]*\s*$/mu', '', $text ) ?? $text;
 		$text = preg_replace( '/^[ \t]*#{1,6}\s*/mu', '', $text ) ?? $text;
 		$text = preg_replace( '/(\*\*|__)(.*?)\1/su', '$2', $text ) ?? $text;
 		$text = preg_replace( '/(?<!\w)[\*_](\S[^*_\n]*?)[\*_](?!\w)/u', '$1', $text ) ?? $text;
 		$text = preg_replace( '/^\s*[\-\*\•]\s+/mu', '', $text ) ?? $text;
 		$text = preg_replace( '/^\s*\d+[\.\)]\s+/mu', '', $text ) ?? $text;
-		// Trailing sign-offs.
-		$text = preg_replace( '/\n+\s*(fim(?: da narrativa| do roteiro)?|fim\.)\s*$/iu', '', $text ) ?? $text;
+		$text = preg_replace( '/\n+\s*(fim(?: da narrativa| do roteiro| da narração)?|fim\.)\s*$/iu', '', $text ) ?? $text;
 		return Normalizer::clean( $text );
 	}
 
@@ -386,7 +459,6 @@ final class NarrativeGenerator {
 	public function post_process( string $text ): string {
 		$text = $this->strip_markup( $text );
 
-		// A first line that is just a title (short, no final punctuation) is not narration.
 		$lines = explode( "\n", $text );
 		if ( count( $lines ) > 1 ) {
 			$first = trim( $lines[0] );
@@ -396,14 +468,12 @@ final class NarrativeGenerator {
 			}
 		}
 
-		// Machine-sounding sentence openers.
 		$openers = implode( '|', self::MACHINE_OPENERS );
 		$text    = preg_replace_callback(
 			'/(^|(?<=[\.\!\?…]\s)|(?<=\n))(?:' . $openers . ')\s*,?\s*(\p{L})/imu',
 			static fn( array $m ): string => $m[1] . mb_strtoupper( $m[2] ),
 			$text
 		) ?? $text;
-		// "Além disso, " / "Portanto, " at sentence start are fine in speech; only the meta ones above go.
 
 		return Normalizer::clean( $text );
 	}

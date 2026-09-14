@@ -26,7 +26,7 @@ final class ExtractiveSummarizer {
 	 *
 	 * @var string[]
 	 */
-	private const STOP_WORDS = array(
+	public const STOP_WORDS = array(
 		'a',
 		'à',
 		'às',
@@ -372,7 +372,7 @@ final class ExtractiveSummarizer {
 			return $out;
 		}
 		foreach ( $paragraphs as $p_index => $paragraph ) {
-			$paragraph = trim( (string) preg_replace( '/\s*\n\s*/u', ' ', $paragraph ) );
+			$paragraph = trim( $paragraph );
 			if ( '' === $paragraph ) {
 				continue;
 			}

@@ -30,9 +30,17 @@ final class SettingsSanitizerTest extends TestCase {
 				'gemini_api_key'  => '',
 				'tts_api_key'     => '__clear__',
 				'ai_model'        => "<b>gpt</b>\n",
+				'ai_provider'     => 'claude',
+				'claude_api_key'  => 'sk-ant-1',
+				'claude_model'    => 'claude-sonnet-5',
+				'max_words'       => '20',
 			),
 			$errors
 		);
+		$this->assertSame( 'claude', $out['ai_provider'] );
+		$this->assertSame( 'sk-ant-1', $out['claude_api_key'] );
+		$this->assertSame( 'claude-sonnet-5', $out['claude_model'] );
+		$this->assertSame( 60, $out['max_words'], 'duration cap is clamped to the minimum' );
 		$this->assertSame( 1, $out['enabled'] );
 		$this->assertSame( 0, $out['debug'] );
 		$this->assertArrayNotHasKey( 'bogus', $out );

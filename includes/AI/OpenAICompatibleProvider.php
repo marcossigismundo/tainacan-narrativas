@@ -20,6 +20,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Works with any server exposing POST {base}/chat/completions: Ollama,
  * LM Studio, vLLM, LocalAI, OpenRouter, institutional gateways, OpenAI itself.
+ *
+ * Subclasses (OpenAI, Groq, DeepSeek, Ollama) fix the base URL and read
+ * their own key/model options; the constructor accepts overrides so the
+ * admin can probe a provider with values not yet saved.
  */
 class OpenAICompatibleProvider extends AbstractHttpProvider implements AIProviderInterface {
 
@@ -46,11 +50,13 @@ class OpenAICompatibleProvider extends AbstractHttpProvider implements AIProvide
 
 	/**
 	 * Constructor reads the global settings; subclasses override the defaults.
+	 *
+	 * @param array<string,string> $config Overrides: base_url|model|api_key.
 	 */
-	public function __construct() {
-		$this->base_url = rtrim( trim( (string) Options::get( 'ai_base_url', '' ) ), '/' );
-		$this->model_id = trim( (string) Options::get( 'ai_model', '' ) );
-		$this->api_key  = Options::secret( 'ai_api_key' );
+	public function __construct( array $config = array() ) {
+		$this->base_url = rtrim( trim( (string) ( $config['base_url'] ?? Options::get( 'ai_base_url', '' ) ) ), '/' );
+		$this->model_id = trim( (string) ( $config['model'] ?? Options::get( 'ai_model', '' ) ) );
+		$this->api_key  = isset( $config['api_key'] ) ? (string) $config['api_key'] : Options::secret( 'ai_api_key' );
 	}
 
 	/**
@@ -64,7 +70,21 @@ class OpenAICompatibleProvider extends AbstractHttpProvider implements AIProvide
 	 * {@inheritDoc}
 	 */
 	public function label(): string {
-		return __( 'Servidor compatível com OpenAI (Ollama, LM Studio, vLLM, LocalAI…)', 'tainacan-narrativas' );
+		return __( 'Servidor compatível com OpenAI', 'tainacan-narrativas' );
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public function description(): string {
+		return __( 'Qualquer endpoint /v1/chat/completions: LM Studio, vLLM, LocalAI, OpenRouter, gateways institucionais. Informe a URL base e o nome do modelo.', 'tainacan-narrativas' );
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public function catalog(): array {
+		return array();
 	}
 
 	/**
@@ -98,7 +118,52 @@ class OpenAICompatibleProvider extends AbstractHttpProvider implements AIProvide
 	}
 
 	/**
-	 * Generates text via POST /chat/completions.
+	 * Whether the model is a reasoning family that rejects `max_tokens` and
+	 * a custom temperature (GPT-5, o-series). Same rule as Oráculo Tainacan.
+	 *
+	 * @param string $model Model id.
+	 * @return bool
+	 */
+	protected function is_reasoning_model( string $model ): bool {
+		return 1 === preg_match( '/^(gpt-5|o\d)/i', $model );
+	}
+
+	/**
+	 * Request body for /chat/completions.
+	 *
+	 * @param string              $system  System prompt.
+	 * @param string              $user    User prompt.
+	 * @param array<string,mixed> $options Options.
+	 * @return array<string,mixed>
+	 */
+	protected function build_body( string $system, string $user, array $options ): array {
+		$body = array(
+			'model'    => $this->model_id,
+			'messages' => array(
+				array(
+					'role'    => 'system',
+					'content' => $system,
+				),
+				array(
+					'role'    => 'user',
+					'content' => $user,
+				),
+			),
+			'stream'   => false,
+		);
+		$max  = (int) ( $options['max_tokens'] ?? Options::get( 'ai_max_tokens', 4000 ) );
+		if ( $this->is_reasoning_model( $this->model_id ) ) {
+			$body['max_completion_tokens'] = $max;
+		} else {
+			$body['max_tokens']  = $max;
+			$body['temperature'] = (float) ( $options['temperature'] ?? Options::get( 'ai_temperature', 0.45 ) );
+		}
+		return $body;
+	}
+
+	/**
+	 * Generates text via POST /chat/completions, adapting parameters the
+	 * endpoint rejects (max_tokens → max_completion_tokens, temperature).
 	 *
 	 * @param string              $system  System prompt.
 	 * @param string              $user    User prompt.
@@ -109,23 +174,26 @@ class OpenAICompatibleProvider extends AbstractHttpProvider implements AIProvide
 		if ( ! $this->is_configured() ) {
 			return new WP_Error( 'tn_ai_not_configured', __( 'Provedor de IA não configurado.', 'tainacan-narrativas' ) );
 		}
-		$body = array(
-			'model'       => $this->model_id,
-			'messages'    => array(
-				array(
-					'role'    => 'system',
-					'content' => $system,
-				),
-				array(
-					'role'    => 'user',
-					'content' => $user,
-				),
-			),
-			'temperature' => (float) ( $options['temperature'] ?? Options::get( 'ai_temperature', 0.3 ) ),
-			'max_tokens'  => (int) ( $options['max_tokens'] ?? Options::get( 'ai_max_tokens', 2500 ) ),
-			'stream'      => false,
-		);
-		$data = $this->post_json( Security::join_url( $this->base_url, '/chat/completions' ), $body, $this->headers(), (int) ( $options['timeout'] ?? Options::get( 'ai_timeout', 120 ) ) );
+		$body    = $this->build_body( $system, $user, $options );
+		$timeout = (int) ( $options['timeout'] ?? Options::get( 'ai_timeout', 180 ) );
+		$data    = null;
+		for ( $attempt = 0; $attempt < 3; $attempt++ ) {
+			$data = $this->post_json( Security::join_url( $this->base_url, '/chat/completions' ), $body, $this->headers(), $timeout );
+			if ( ! is_wp_error( $data ) ) {
+				break;
+			}
+			$message = $data->get_error_message();
+			if ( isset( $body['max_tokens'] ) && preg_match( '/max_tokens.+max_completion_tokens/i', $message ) ) {
+				$body['max_completion_tokens'] = $body['max_tokens'];
+				unset( $body['max_tokens'] );
+				continue;
+			}
+			if ( isset( $body['temperature'] ) && false !== stripos( $message, 'temperature' ) ) {
+				unset( $body['temperature'] );
+				continue;
+			}
+			return $data;
+		}
 		if ( is_wp_error( $data ) ) {
 			return $data;
 		}

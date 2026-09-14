@@ -54,6 +54,23 @@ $tn_template = '' !== trim( (string) $settings['template_script'] ) ? (string) $
 					<input type="text" id="tn-lang" name="tn[default_language]" value="<?php echo esc_attr( (string) $settings['default_language'] ); ?>">
 				</div>
 			</div>
+			<div class="tn-field-row">
+				<div class="tn-field">
+					<label for="tn-max-words"><?php esc_html_e( 'Duração máxima da narração (palavras)', 'tainacan-narrativas' ); ?></label>
+					<input type="number" id="tn-max-words" name="tn[max_words]" min="60" max="1500" step="10" value="<?php echo (int) ( $settings['max_words'] ?? 280 ); ?>">
+					<p class="description">
+						<?php
+						$tn_secs = (int) round( (int) ( $settings['max_words'] ?? 280 ) / 150 * 60 );
+						printf(
+							/* translators: 1: minutes, 2: seconds. */
+							esc_html__( 'Limite absoluto para todos os modos: ≈ %1$d min %2$02d s a 150 palavras por minuto. 280 palavras = cerca de 2 minutos. Roteiros mais longos são condensados mantendo as frases originais.', 'tainacan-narrativas' ),
+							(int) floor( $tn_secs / 60 ),
+							(int) ( $tn_secs % 60 )
+						);
+						?>
+					</p>
+				</div>
+			</div>
 			<h3><?php esc_html_e( 'Fontes padrão', 'tainacan-narrativas' ); ?></h3>
 			<div class="tn-field tn-field--check">
 				<label><input type="checkbox" name="tn[include_description]" value="1" <?php checked( ! empty( $settings['include_description'] ) ); ?>> <?php esc_html_e( 'Descrição', 'tainacan-narrativas' ); ?></label>

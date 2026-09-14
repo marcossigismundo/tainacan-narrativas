@@ -36,32 +36,32 @@ final class Modes {
 			),
 			'documentary'  => array(
 				'label'        => __( 'Narrativa documental', 'tainacan-narrativas' ),
-				'description'  => __( 'Texto fluido para ser ouvido, mantendo rigor documental. Padrão recomendado.', 'tainacan-narrativas' ),
-				'target_words' => 900,
+				'description'  => __( 'Texto fluido para ser ouvido, estritamente a partir do que está no item. Padrão recomendado.', 'tainacan-narrativas' ),
+				'target_words' => 280,
 				'ai'           => true,
 			),
 			'storytelling' => array(
-				'label'        => __( 'História contextualizada', 'tainacan-narrativas' ),
-				'description'  => __( 'Storytelling moderado, exclusivamente a partir das fontes fornecidas.', 'tainacan-narrativas' ),
-				'target_words' => 900,
+				'label'        => __( 'Relato encadeado', 'tainacan-narrativas' ),
+				'description'  => __( 'Começo, meio e fim, exclusivamente com os fatos registrados nas fontes (sem cenas nem contexto inventado).', 'tainacan-narrativas' ),
+				'target_words' => 280,
 				'ai'           => true,
 			),
 			'summary'      => array(
 				'label'        => __( 'Resumo em áudio', 'tainacan-narrativas' ),
-				'description'  => __( 'Entre 1 e 3 minutos.', 'tainacan-narrativas' ),
-				'target_words' => 300,
+				'description'  => __( 'Cerca de um minuto.', 'tainacan-narrativas' ),
+				'target_words' => 150,
 				'ai'           => true,
 			),
 			'detailed'     => array(
 				'label'        => __( 'Narrativa detalhada', 'tainacan-narrativas' ),
-				'description'  => __( 'Entre 5 e 10 minutos, conforme a quantidade de conteúdo.', 'tainacan-narrativas' ),
-				'target_words' => 1500,
+				'description'  => __( 'O máximo de conteúdo do documento que cabe no limite de duração.', 'tainacan-narrativas' ),
+				'target_words' => 0,
 				'ai'           => true,
 			),
 			'accessible'   => array(
 				'label'        => __( 'Linguagem simples', 'tainacan-narrativas' ),
 				'description'  => __( 'Texto acessível ao público geral, frases curtas e vocabulário comum.', 'tainacan-narrativas' ),
-				'target_words' => 600,
+				'target_words' => 220,
 				'ai'           => true,
 			),
 		);
@@ -69,7 +69,7 @@ final class Modes {
 			$modes['children'] = array(
 				'label'        => __( 'Público infantil', 'tainacan-narrativas' ),
 				'description'  => __( 'Somente quando habilitado explicitamente. Não infantiliza temas sensíveis.', 'tainacan-narrativas' ),
-				'target_words' => 400,
+				'target_words' => 200,
 				'ai'           => true,
 			);
 		}
@@ -101,6 +101,21 @@ final class Modes {
 	public static function get( string $mode ): array {
 		$all = self::all();
 		return $all[ $mode ] ?? $all['documentary'];
+	}
+
+	/**
+	 * Word budget for a mode after the global duration cap (`max_words`,
+	 * ≈ 2 minutes at 150 wpm). Every path — AI prompt, template builder,
+	 * post-generation trim — uses this single number.
+	 *
+	 * @param string $mode Mode id.
+	 * @return int Always > 0.
+	 */
+	public static function target_words_for( string $mode ): int {
+		$cap    = (int) Options::get( 'max_words', 280 );
+		$cap    = $cap > 0 ? $cap : 280;
+		$target = (int) ( self::get( $mode )['target_words'] ?? 0 );
+		return $target > 0 ? min( $target, $cap ) : $cap;
 	}
 
 	/**

@@ -216,6 +216,7 @@ class AdminPage extends \Tainacan\Pages {
 		}
 		$diagnostics     = 'diagnostics' === $tab ? ( new Diagnostics( $manager ) )->run() : array();
 		$coverage        = 'dashboard' === $tab ? $manager->coverage() : array();
+		$ai_providers    = 'ai' === $tab ? $manager->ai()->ui_providers() : array();
 		$providers_state = array();
 		if ( in_array( $tab, array( 'ai', 'voice', 'wizard' ), true ) ) {
 			foreach ( $manager->ai()->all() as $id => $p ) {

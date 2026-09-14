@@ -118,7 +118,7 @@ final class SettingsHandler {
 			$update['tts_voice'] = sanitize_text_field( (string) $post['tts_voice'] );
 		}
 		$ai                    = isset( $post['ai_provider'] ) ? sanitize_key( (string) $post['ai_provider'] ) : 'none';
-		$update['ai_provider'] = in_array( $ai, array( 'none', 'openai_compatible', 'openai', 'ollama', 'gemini', 'wp_ai' ), true ) ? $ai : 'none';
+		$update['ai_provider'] = in_array( $ai, array( 'none', 'openai', 'claude', 'gemini', 'groq', 'deepseek', 'ollama', 'openai_compatible', 'wp_ai' ), true ) ? $ai : 'none';
 		if ( ! empty( $post['ai_base_url'] ) ) {
 			$update['ai_base_url'] = esc_url_raw( (string) $post['ai_base_url'] );
 		}
@@ -217,6 +217,7 @@ final class SettingsHandler {
 			'cron_time_budget' => array( 5, 120 ),
 			'max_attempts'     => array( 1, 10 ),
 			'coverage_batch'   => array( 1, 2000 ),
+			'max_words'        => array( 60, 1500 ),
 			'keep_versions'    => array( 0, 50 ),
 			'max_attachments'  => array( 0, 50 ),
 			'max_chars_item'   => array( 1000, 500000 ),
@@ -246,7 +247,7 @@ final class SettingsHandler {
 		$enums = array(
 			'trigger_on_save'      => array( 'none', 'mark_stale', 'queue' ),
 			'editorial_flow'       => array( 'auto', 'review' ),
-			'ai_provider'          => array( 'none', 'openai_compatible', 'openai', 'ollama', 'gemini', 'wp_ai' ),
+			'ai_provider'          => array( 'none', 'openai', 'claude', 'gemini', 'groq', 'deepseek', 'ollama', 'openai_compatible', 'wp_ai' ),
 			'tts_provider'         => array( 'browser', 'openai_compatible', 'piper_http', 'wp_ai' ),
 			'tts_format'           => array( 'mp3', 'wav' ),
 			'piper_payload'        => array( 'json', 'raw' ),
@@ -264,7 +265,7 @@ final class SettingsHandler {
 			$out['default_mode'] = Modes::sanitize( $in['default_mode'] );
 		}
 
-		$texts = array( 'ai_model', 'ollama_model', 'gemini_model', 'tts_model', 'tts_voice', 'piper_voice', 'browser_voice_hint', 'default_language', 'browser_lang' );
+		$texts = array( 'ai_model', 'openai_model', 'claude_model', 'gemini_model', 'groq_model', 'deepseek_model', 'ollama_model', 'tts_model', 'tts_voice', 'piper_voice', 'browser_voice_hint', 'default_language', 'browser_lang' );
 		foreach ( $texts as $key ) {
 			if ( isset( $in[ $key ] ) ) {
 				$out[ $key ] = sanitize_text_field( (string) $in[ $key ] );

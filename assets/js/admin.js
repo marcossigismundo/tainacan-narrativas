@@ -87,26 +87,48 @@
 	/* ------------------------------------------------------------------ */
 	/* Provider panes                                                      */
 	/* ------------------------------------------------------------------ */
+	function showProviderPanes( group, value ) {
+		document.querySelectorAll( '[data-tn-provider-pane^="' + group + ':"]' ).forEach( function ( pane ) {
+			var visible = pane.getAttribute( 'data-tn-provider-pane' ) === group + ':' + value;
+			pane.classList.toggle( 'is-visible', visible );
+			// Hidden panes are disabled so duplicated field names (e.g. tn[ai_model]) are submitted once.
+			pane.querySelectorAll( 'input, select, textarea' ).forEach( function ( f ) {
+				if ( f.hasAttribute( 'data-tn-locked' ) ) {
+					return;
+				}
+				var fieldsetDisabled = !! ( f.closest( 'fieldset' ) && f.closest( 'fieldset' ).disabled );
+				f.disabled = ! visible || fieldsetDisabled;
+			} );
+		} );
+	}
+
 	function initProviderSwitches() {
 		document.querySelectorAll( '[data-tn-provider-switch]' ).forEach( function ( select ) {
 			var group = select.getAttribute( 'data-tn-provider-switch' );
-			var update = function () {
-				document.querySelectorAll( '[data-tn-provider-pane^="' + group + ':"]' ).forEach( function ( pane ) {
-					var visible = pane.getAttribute( 'data-tn-provider-pane' ) === group + ':' + select.value;
-					pane.classList.toggle( 'is-visible', visible );
-					// Hidden panes are disabled so duplicated field names (e.g. tn[ai_model]) are submitted once.
-					pane.querySelectorAll( 'input, select, textarea' ).forEach( function ( f ) {
-						if ( f.hasAttribute( 'data-tn-locked' ) ) {
-							return;
-						}
-						var fieldsetDisabled = !! ( f.closest( 'fieldset' ) && f.closest( 'fieldset' ).disabled );
-						f.disabled = ! visible || fieldsetDisabled;
-					} );
-				} );
-			};
+			var update = function () { showProviderPanes( group, select.value ); };
 			select.addEventListener( 'change', update );
 			update();
 		} );
+		// Provider cards (radio group), Oráculo-style.
+		var radios = document.querySelectorAll( '[data-tn-provider-radio]' );
+		if ( radios.length ) {
+			var updateCards = function () {
+				var group = radios[ 0 ].getAttribute( 'data-tn-provider-radio' );
+				var value = 'none';
+				radios.forEach( function ( r ) {
+					var card = r.closest( '.tn-provider-card' );
+					if ( card ) {
+						card.classList.toggle( 'is-selected', r.checked );
+					}
+					if ( r.checked ) {
+						value = r.value;
+					}
+				} );
+				showProviderPanes( group, value );
+			};
+			radios.forEach( function ( r ) { r.addEventListener( 'change', updateCards ); } );
+			updateCards();
+		}
 		// CSV → hidden array inputs (metadata order).
 		document.querySelectorAll( '[data-tn-csv-target]' ).forEach( function ( input ) {
 			var holder = document.getElementById( input.getAttribute( 'data-tn-csv-target' ) );
@@ -410,10 +432,38 @@
 		} );
 		api( { path: NS + '/items/' + itemId + '/preview' } ).then( function ( p ) {
 			renderPreview( detail.querySelector( '[data-tn-detail-pane="sources"]' ), p );
+			loadFaithfulness( itemId );
 		} ).catch( function ( e ) {
 			var pane = detail.querySelector( '[data-tn-detail-pane="sources"]' );
 			pane.textContent = errMsg( e );
 		} );
+	}
+
+	function loadFaithfulness( itemId ) {
+		var pane = detail.querySelector( '[data-tn-detail-pane="sources"]' );
+		api( { path: NS + '/items/' + itemId + '/faithfulness' } ).then( function ( f ) {
+			var box = el( 'div', { 'class': 'tn-faith ' + ( f.ok ? '' : ( f.flagged > 2 ? 'is-error' : 'is-warn' ) ) } );
+			var title = f.ok
+				? 'Fidelidade: todas as ' + f.total + ' frases têm apoio nas fontes do item.'
+				: 'Fidelidade: ' + f.flagged + ' de ' + f.total + ' frase(s) sem apoio nas fontes — revise antes de aprovar.';
+			box.appendChild( el( 'div', { 'class': 'tn-faith__title', text: title } ) );
+			box.appendChild( el( 'div', { 'class': 'tn-muted', text: f.words + ' palavras (limite ' + f.max_words + ').' + ( f.generation && f.generation.removed ? ' Na geração, ' + f.generation.removed + ' frase(s) sem apoio foram removidas automaticamente.' : '' ) + ( f.generation && f.generation.retried ? ' A IA foi chamada a corrigir uma vez.' : '' ) } ) );
+			if ( ! f.ok ) {
+				var ul = el( 'ul' );
+				f.sentences.forEach( function ( s ) {
+					var li = el( 'li' );
+					li.appendChild( document.createTextNode( s.text + ' ' ) );
+					if ( s.unsupported && s.unsupported.length ) {
+						li.appendChild( el( 'em', { text: '[sem apoio: ' + s.unsupported.join( ', ' ) + ']' } ) );
+					} else {
+						li.appendChild( el( 'em', { text: '[frase sem ancoragem nas fontes]' } ) );
+					}
+					ul.appendChild( li );
+				} );
+				box.appendChild( ul );
+			}
+			pane.insertBefore( box, pane.firstChild );
+		} ).catch( function () { /* no script yet */ } );
 	}
 
 	function generate( itemId, force, then ) {
@@ -556,9 +606,67 @@
 					}, 400 );
 				} ).catch( function ( e ) { output( panel, errMsg( e ), 'error' ); } );
 				break;
+			case 'fetch-models':
+				var fmProvider = target.getAttribute( 'data-provider' );
+				var fmPane = target.closest( '[data-tn-provider-pane]' );
+				var fmStatus = document.querySelector( '[data-tn-models-status="' + fmProvider + '"]' );
+				var fmData = { provider: fmProvider };
+				if ( fmPane ) {
+					var keyField = fmPane.querySelector( '[data-tn-provider-key]' );
+					var urlField = fmPane.querySelector( '[data-tn-provider-url]' );
+					if ( keyField && keyField.value ) { fmData.api_key = keyField.value; }
+					if ( urlField && urlField.value ) { fmData.base_url = urlField.value; }
+				}
+				if ( fmStatus ) { fmStatus.textContent = I.working || 'Processando…'; }
+				api( { path: NS + '/providers/models', method: 'POST', data: fmData } ).then( function ( r ) {
+					var field = fmPane ? fmPane.querySelector( '[data-tn-provider-model]' ) : null;
+					if ( ! field ) {
+						return;
+					}
+					var current = field.value;
+					if ( field.tagName === 'SELECT' ) {
+						while ( field.firstChild ) { field.removeChild( field.firstChild ); }
+						var seen = false;
+						r.models.forEach( function ( m ) {
+							var opt = el( 'option', { value: m.id, text: m.name === m.id ? m.id : ( m.name + ' — ' + m.id ) } );
+							if ( m.id === current ) { opt.selected = true; seen = true; }
+							field.appendChild( opt );
+						} );
+						if ( current && ! seen ) {
+							var keep = el( 'option', { value: current, text: current + ' (configurado)' } );
+							keep.selected = true;
+							field.insertBefore( keep, field.firstChild );
+						}
+					} else {
+						var list = document.getElementById( 'tn-ai-models-' + fmProvider );
+						if ( list ) {
+							while ( list.firstChild ) { list.removeChild( list.firstChild ); }
+							r.models.forEach( function ( m ) { list.appendChild( el( 'option', { value: m.id } ) ); } );
+						}
+						if ( ! current && r.models.length ) { field.value = r.models[ 0 ].id; }
+					}
+					if ( fmStatus ) { fmStatus.textContent = r.models.length + ' modelo(s) disponível(is) para esta conta/servidor. Escolha um e salve.'; }
+				} ).catch( function ( e ) {
+					if ( fmStatus ) { fmStatus.textContent = errMsg( e ); }
+					toast( errMsg( e ), 'error' );
+				} );
+				break;
 			case 'test-provider':
 				output( panel, I.testing || 'Testando…' );
-				api( { path: NS + '/providers/test', method: 'POST', data: { kind: target.getAttribute( 'data-kind' ) } } ).then( function ( r ) {
+				var tpData = { kind: target.getAttribute( 'data-kind' ) };
+				if ( target.getAttribute( 'data-provider' ) ) {
+					tpData.provider = target.getAttribute( 'data-provider' );
+					var tpPane = target.closest( '[data-tn-provider-pane]' );
+					if ( tpPane ) {
+						var tpKey = tpPane.querySelector( '[data-tn-provider-key]' );
+						var tpUrl = tpPane.querySelector( '[data-tn-provider-url]' );
+						var tpModel = tpPane.querySelector( '[data-tn-provider-model]' );
+						if ( tpKey && tpKey.value ) { tpData.api_key = tpKey.value; }
+						if ( tpUrl && tpUrl.value ) { tpData.base_url = tpUrl.value; }
+						if ( tpModel && tpModel.value ) { tpData.model = tpModel.value; }
+					}
+				}
+				api( { path: NS + '/providers/test', method: 'POST', data: tpData } ).then( function ( r ) {
 					var box = el( 'div' );
 					box.appendChild( el( 'p', { text: r.message } ) );
 					if ( r.details && Object.keys( r.details ).length ) {

@@ -44,9 +44,10 @@ final class ExtractiveSummarizerTest extends TestCase {
 
 	public function test_metadata_phraser(): void {
 		$this->assertSame( 'De autoria de Maria Silva.', MetadataPhraser::sentence( 'Autoria', 'Maria Silva.' ) );
-		$this->assertSame( 'O registro data de 12 de outubro de 1918.', MetadataPhraser::sentence( 'Data', '1918-10-12', 'Date' ) );
-		$this->assertSame( 'Trata de saúde, memória e pandemia.', MetadataPhraser::sentence( 'Assuntos', 'saúde|memória|pandemia' ) );
-		$this->assertSame( 'Está situado em Oiapoque, Amapá.', MetadataPhraser::sentence( 'Local', 'Oiapoque > Amapá' ) );
+		$this->assertSame( 'Data registrada: 12 de outubro de 1918.', MetadataPhraser::sentence( 'Data', '1918-10-12', 'Date' ) );
+		$this->assertSame( 'Assuntos: saúde, memória e pandemia.', MetadataPhraser::sentence( 'Assuntos', 'saúde|memória|pandemia' ) );
+		$this->assertSame( 'Local registrado: Oiapoque, Amapá.', MetadataPhraser::sentence( 'Local', 'Oiapoque > Amapá' ) );
+		$this->assertSame( 'Editora: Companhia das Letras.', MetadataPhraser::sentence( 'Editora', 'Companhia das Letras' ), 'ambiguous fields stay literal' );
 		$this->assertSame( 'Campo raro: valor.', MetadataPhraser::sentence( 'Campo raro', 'valor' ) );
 		$this->assertSame( '', MetadataPhraser::sentence( 'URL', 'https://x.org' ) );
 		$this->assertSame( 'Relato completo do depoimento.', MetadataPhraser::sentence( 'Âmbito e conteúdo', 'Relato completo do depoimento' ) );

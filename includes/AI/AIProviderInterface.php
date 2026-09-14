@@ -15,7 +15,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * One text-generation call at a time; the narrative pipeline (chunking,
- * consolidation, mode prompt) lives in NarrativeGenerator and is provider-agnostic.
+ * consolidation, mode prompt, faithfulness check) lives in NarrativeGenerator
+ * and is provider-agnostic.
+ *
+ * Providers are constructed from the saved options; ProviderManager::make()
+ * can also build one with overrides (an API key typed but not yet saved) so
+ * the admin can list a provider's models before saving.
  */
 interface AIProviderInterface {
 
@@ -32,6 +37,13 @@ interface AIProviderInterface {
 	 * @return string
 	 */
 	public function label(): string;
+
+	/**
+	 * One-sentence description for the provider card.
+	 *
+	 * @return string
+	 */
+	public function description(): string;
 
 	/**
 	 * Whether the provider has what it needs (URL, key, model…).
@@ -55,6 +67,13 @@ interface AIProviderInterface {
 	public function model(): string;
 
 	/**
+	 * Built-in model catalog (may be empty for free-form providers).
+	 *
+	 * @return array<int,array{id:string,name:string,description:string}>
+	 */
+	public function catalog(): array;
+
+	/**
 	 * Generates text.
 	 *
 	 * @param string              $system  System prompt.
@@ -72,9 +91,9 @@ interface AIProviderInterface {
 	public function test(): array;
 
 	/**
-	 * Models offered by the endpoint (may be empty).
+	 * Models the account/endpoint actually offers (remote list; may be empty).
 	 *
-	 * @return string[]
+	 * @return string[] Model ids.
 	 */
 	public function list_models(): array;
 }

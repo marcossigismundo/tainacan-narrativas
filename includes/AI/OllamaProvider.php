@@ -31,12 +31,14 @@ final class OllamaProvider extends OpenAICompatibleProvider {
 
 	/**
 	 * Constructor.
+	 *
+	 * @param array<string,string> $config Overrides: base_url|model.
 	 */
-	public function __construct() {
-		parent::__construct();
-		$this->native_base = rtrim( trim( (string) Options::get( 'ollama_base_url', 'http://127.0.0.1:11434' ) ), '/' );
+	public function __construct( array $config = array() ) {
+		$this->native_base = rtrim( trim( (string) ( $config['base_url'] ?? Options::get( 'ollama_base_url', 'http://127.0.0.1:11434' ) ) ), '/' );
+		$this->native_base = (string) preg_replace( '#/v1$#', '', $this->native_base );
 		$this->base_url    = Security::join_url( $this->native_base, '/v1' );
-		$this->model_id    = trim( (string) Options::get( 'ollama_model', 'llama3.2' ) );
+		$this->model_id    = trim( (string) ( $config['model'] ?? Options::get( 'ollama_model', 'llama3.2' ) ) );
 		$this->api_key     = '';
 	}
 
@@ -52,6 +54,13 @@ final class OllamaProvider extends OpenAICompatibleProvider {
 	 */
 	public function label(): string {
 		return 'Ollama (local)';
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public function description(): string {
+		return __( 'Modelos rodando no seu próprio servidor: nada sai da instituição. Informe a URL do Ollama e escolha um modelo já baixado (ollama pull).', 'tainacan-narrativas' );
 	}
 
 	/**

@@ -249,6 +249,38 @@ final class NarrativeManager {
 	}
 
 	/**
+	 * Faithfulness report of the current (final) script against the item's
+	 * sources — for the review screen, including after human edits.
+	 *
+	 * @param int $item_id Item ID.
+	 * @return array<string,mixed>|WP_Error
+	 */
+	public function faithfulness( int $item_id ) {
+		$item = ItemDetector::get_item( $item_id );
+		if ( ! $item ) {
+			return new WP_Error( 'tn_not_found', __( 'Item Tainacan não encontrado.', 'tainacan-narrativas' ), array( 'status' => 404 ) );
+		}
+		$row = $this->repo->get_current( $item_id );
+		if ( ! $row || '' === trim( self::final_script( $row ) ) ) {
+			return new WP_Error( 'tn_no_script', __( 'Não há roteiro para verificar.', 'tainacan-narrativas' ), array( 'status' => 404 ) );
+		}
+		$config               = CollectionSettings::effective( (int) $item->get_collection_id() );
+		$corpus               = $this->collector->collect( $item, $config );
+		$checker              = new FaithfulnessChecker( $corpus, ScriptBuilder::boilerplate_sentences() );
+		$report               = $checker->check( self::final_script( $row ) );
+		$report['sentences']  = array_values(
+			array_filter(
+				$report['sentences'],
+				static fn( array $s ): bool => ! $s['ok']
+			)
+		);
+		$report['generation'] = $row['stats']['faithfulness'] ?? null;
+		$report['words']      = Normalizer::word_count( self::final_script( $row ) );
+		$report['max_words']  = Modes::target_words_for( (string) $row['mode'] );
+		return $report;
+	}
+
+	/**
 	 * Data for the public player. Null when nothing should be shown.
 	 *
 	 * @param int $item_id Item ID.
@@ -288,8 +320,8 @@ final class NarrativeManager {
 			'allow_download' => (bool) $config['allow_download'] && '' !== $audio_url,
 			'provenance'     => Options::is( 'provenance_notice' )
 				? ( $is_ai
-					? __( 'Texto narrativo produzido automaticamente a partir das informações documentais deste registro.', 'tainacan-narrativas' )
-					: __( 'Narrativa produzida a partir das informações deste registro.', 'tainacan-narrativas' ) )
+					? __( 'Narração gerada automaticamente apenas com as informações registradas neste item (metadados e documentos), verificada frase a frase contra essas fontes. Em caso de dúvida, consulte o documento original.', 'tainacan-narrativas' )
+					: __( 'Narração montada exclusivamente com as informações registradas neste item.', 'tainacan-narrativas' ) )
 				: '',
 			'browser'        => array(
 				'lang'   => (string) Options::get( 'browser_lang', 'pt-BR' ),
@@ -414,7 +446,8 @@ final class NarrativeManager {
 							'code' => $gen->get_error_code(),
 						)
 					);
-					$stats['ai_fallback'] = $gen->get_error_message();
+					// Unfaithful output is not retried by the coverage sweep: the template is the safe answer.
+					$stats[ 'tn_ai_unfaithful' === $gen->get_error_code() ? 'ai_unfaithful' : 'ai_fallback' ] = $gen->get_error_message();
 				} else {
 					$script   = $gen['script'];
 					$ai_id    = $provider->id();

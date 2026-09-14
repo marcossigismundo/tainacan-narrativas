@@ -31,9 +31,13 @@ final class Options {
 	 * Map of secret option keys to their wp-config constant.
 	 */
 	public const SECRET_CONSTANTS = array(
-		'ai_api_key'     => 'TN_AI_API_KEY',
-		'gemini_api_key' => 'TN_GEMINI_API_KEY',
-		'tts_api_key'    => 'TN_TTS_API_KEY',
+		'ai_api_key'       => 'TN_AI_API_KEY',
+		'openai_api_key'   => 'TN_OPENAI_API_KEY',
+		'claude_api_key'   => 'TN_CLAUDE_API_KEY',
+		'gemini_api_key'   => 'TN_GEMINI_API_KEY',
+		'groq_api_key'     => 'TN_GROQ_API_KEY',
+		'deepseek_api_key' => 'TN_DEEPSEEK_API_KEY',
+		'tts_api_key'      => 'TN_TTS_API_KEY',
 	);
 
 	/**
@@ -63,6 +67,7 @@ final class Options {
 			'coverage_batch'          => 150,
 			'default_mode'            => 'documentary',
 			'default_language'        => 'pt-BR',
+			'max_words'               => 280, // ≈ 2 minutes at 150 wpm; hard cap for every mode.
 			'editorial_flow'          => 'auto', // auto | review.
 			'allow_download'          => 0,
 			'provenance_notice'       => 1,
@@ -76,10 +81,18 @@ final class Options {
 			'max_chars_file'          => 40000,
 			'chunk_size'              => 6000,
 			// AI.
-			'ai_provider'             => 'none', // none | openai_compatible | openai | ollama | gemini | wp_ai.
+			'ai_provider'             => 'none', // none | openai | claude | gemini | groq | deepseek | ollama | openai_compatible | wp_ai.
 			'ai_base_url'             => '',
 			'ai_model'                => '',
 			'ai_api_key'              => '',
+			'openai_api_key'          => '',
+			'openai_model'            => 'gpt-5-mini',
+			'claude_api_key'          => '',
+			'claude_model'            => 'claude-sonnet-5',
+			'groq_api_key'            => '',
+			'groq_model'              => 'llama-3.3-70b-versatile',
+			'deepseek_api_key'        => '',
+			'deepseek_model'          => 'deepseek-chat',
 			'ai_timeout'              => 180,
 			'ai_temperature'          => 0.45,
 			'ai_max_tokens'           => 4000,

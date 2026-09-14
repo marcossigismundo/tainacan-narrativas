@@ -2,6 +2,29 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/); versionamento semântico.
 
+## [1.2.0] — 2026-09-14
+
+Resposta ao relato de narrações com fatos que não estavam no item. Auditoria das
+fontes de invenção: (1) a IA — prompts que pediam "cena de abertura" e
+"documentário de rádio" incentivavam floreio e contextualização; (2) a camada
+de fala — expansão de abreviações ambíguas (`R.` → "rua" em iniciais de nome,
+`Cap.` → "capítulo", `Sec.` → "século") e algarismos romanos após sobrenome
+(`Fulano L.` → "cinquenta"); (3) o fraseador de metadados — frases
+interpretativas ("Está situado em", "Vem de"). Todas corrigidas abaixo.
+
+### Adicionado
+- `Narrative\FaithfulnessChecker`: verificação determinística frase a frase da narração contra as fontes do item (números com 2+ dígitos, nomes próprios fora do início de frase, sobreposição lexical mínima). `NarrativeGenerator` roda a verificação, pede UMA correção à IA (`prompts/faithfulness-fix.php`), remove o que continuar sem apoio e rejeita o resultado (`tn_ai_unfaithful` → template) se sobrar menos de 25 palavras. Resultado gravado em `stats.faithfulness`; `GET /items/{id}/faithfulness` e painel "Fidelidade" em Narrativas → Fontes e saúde (inclusive após edição humana).
+- Opção `max_words` (padrão 280 ≈ 2 min a 150 wpm) com `Modes::target_words_for()`: teto para todos os modos (IA, template, `faithful`, `detailed`); excedente condensado por `ExtractiveSummarizer` (frases originais, nunca reescrita). Fontes com < 1500 caracteres recebem instrução de resumo breve e literal e alvo de 120 palavras.
+- Provedores de IA no padrão do Oráculo Tainacan: `ClaudeProvider` (Messages API), `GroqProvider`, `DeepSeekProvider`; `catalog()`/`description()` na interface; `ProviderManager::make()` com overrides não salvos e `ui_providers()`; `POST /providers/models` (lista da conta com chave ainda não salva); `/providers/test` aceita overrides; aba IA com cards de provedor, select de modelos + "(configurado)", botões "Buscar modelos da conta"/"Testar conexão"; chaves próprias `openai_api_key`/`claude_api_key`/`groq_api_key`/`deepseek_api_key` (constantes `TN_*_API_KEY`), `openai_model`/`claude_model`/`groq_model`/`deepseek_model`. OpenAI: `max_completion_tokens` e sem temperature para GPT-5/o-series, com fallback ao erro `unsupported_parameter`.
+
+### Alterado
+- Prompts (system + modos) reescritos com a "regra zero — nada de invenção": cada frase rastreável às fontes, sem contexto externo, sem cenas/ambientes/gestos, sem completar lacunas; `{brevity}` para fontes curtas; limite de palavras explícito. Modo "História contextualizada" renomeado "Relato encadeado". `PROMPT_VERSION` = 3.
+- `SpeechText`: tabela de abreviações reduzida ao inequívoco; tokens de 1 letra nunca expandem; `DOT_ONLY`, `NUMERIC_CONTEXT` (art./fl./vol./pág. só antes de número) e `STATE_NEEDS_CONTEXT` (SE/AM/TO/PA/… só após "(", "-", "/"); romanos após nome exigem 2+ letras e valor ≤ 40; faixas de anos só 1000–2099; bloco de abreviações roda antes das regras numéricas.
+- `MetadataPhraser`: frases neutras que só reafirmam o rótulo ("Data registrada:", "Local registrado:", "Assuntos:", "Tipo de documento:"); campos ambíguos (editora, fonte, dimensões) ficam literais "Rótulo: valor."
+- Nota de proveniência pública explicita que a narração usa apenas o que está no item e foi verificada frase a frase.
+- Coverage sweep não regenera itens marcados `stats.ai_unfaithful` (o template é a resposta segura para eles).
+- `QueueManager::process()` sem `ini_get('safe_mode')` (removido no PHP 5.4).
+
 ## [1.1.1] — 2026-09-14
 
 ### Alterado

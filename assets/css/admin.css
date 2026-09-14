@@ -266,3 +266,22 @@ span.tn-card { cursor: default; }
 	.tn-cards { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
 	.tn-card__value { font-size: var(--tn-fs-2xl); }
 }
+
+/* AI provider cards (Oráculo-style selector) */
+.tn-provider-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: var(--tn-sp-3); margin: var(--tn-sp-4) 0; }
+.tn-provider-card { position: relative; display: flex; flex-direction: column; gap: var(--tn-sp-1); padding: var(--tn-sp-3) var(--tn-sp-4); border: 1px solid var(--tn-border); border-radius: calc(var(--tn-radius) * 1.4); background: var(--tn-white); cursor: pointer; transition: border-color 0.15s ease, box-shadow 0.15s ease; font-size: var(--tn-fs-base); }
+.tn-provider-card:hover { border-color: var(--tn-primary); }
+.tn-provider-card.is-selected { border-color: var(--tn-primary); box-shadow: 0 0 0 2px var(--tn-primary-bg); background: var(--tn-primary-bg); }
+.tn-provider-card input[type="radio"] { position: absolute; top: var(--tn-sp-3); right: var(--tn-sp-3); margin: 0; }
+.tn-provider-card__name { font-weight: 700; padding-right: 1.5rem; }
+.tn-provider-card__badges { display: flex; gap: var(--tn-sp-1); flex-wrap: wrap; }
+.tn-provider-card__desc { font-size: var(--tn-fs-sm); color: var(--tn-text-light); line-height: 1.5; }
+.tn-provider-panel { margin-top: var(--tn-sp-4); padding: var(--tn-sp-4) var(--tn-sp-5); border: 1px solid var(--tn-border); border-radius: var(--tn-radius); background: var(--tn-bg); }
+.tn-provider-panel h3 { margin-top: 0; }
+.tn-faith { display: flex; flex-direction: column; gap: var(--tn-sp-2); margin-bottom: var(--tn-sp-4); padding: var(--tn-sp-3) var(--tn-sp-4); border-radius: var(--tn-radius); background: var(--tn-bg); border-left: 4px solid var(--tn-success); font-size: var(--tn-fs-base); }
+.tn-faith.is-warn { border-left-color: var(--tn-warning); }
+.tn-faith.is-error { border-left-color: var(--tn-danger); }
+.tn-faith__title { font-weight: 700; }
+.tn-faith ul { margin: 0 0 0 1.1rem; }
+.tn-faith li { margin: 0.2rem 0; }
+.tn-faith li em { color: var(--tn-danger); font-style: normal; font-weight: 600; }
