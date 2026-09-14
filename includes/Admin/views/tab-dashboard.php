@@ -41,10 +41,14 @@ $tn_cards         = array(
 <div class="tn-cards">
 	<?php foreach ( $tn_cards as $tn_card ) : ?>
 		<?php $tn_href = '' !== $tn_card[2] ? $base_url . '&tab=narratives&status=' . $tn_card[2] : ''; ?>
-		<a class="tn-card tn-card--<?php echo esc_attr( $tn_card[3] ); ?>" <?php echo '' !== $tn_href ? 'href="' . esc_url( $tn_href ) . '"' : ''; ?>>
-			<span class="tn-card__value"><?php echo esc_html( $tn_card[1] ); ?></span>
-			<span class="tn-card__label"><?php echo esc_html( $tn_card[0] ); ?></span>
-		</a>
+		<?php $tn_tag = '' !== $tn_href ? 'a' : 'span'; ?>
+		<<?php echo esc_html( $tn_tag ); ?> class="tn-card tn-card--<?php echo esc_attr( $tn_card[3] ); ?>" <?php echo 'a' === $tn_tag ? 'href="' . esc_url( $tn_href ) . '"' : ''; ?>>
+			<span class="tn-card__icon" aria-hidden="true"></span>
+			<span class="tn-card__body">
+				<span class="tn-card__value"><?php echo esc_html( $tn_card[1] ); ?></span>
+				<span class="tn-card__label"><?php echo esc_html( $tn_card[0] ); ?></span>
+			</span>
+		</<?php echo esc_html( $tn_tag ); ?>>
 	<?php endforeach; ?>
 </div>
 

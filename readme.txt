@@ -4,7 +4,7 @@ Tags: tainacan, audio, acessibilidade, narrativa, text-to-speech
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -61,6 +61,11 @@ Somente título, descrição, nome da coleção, metadados públicos e o texto d
 No banco (mascaradas no painel, nunca enviadas ao navegador) ou, preferencialmente, em `wp-config.php` via `TN_AI_API_KEY`, `TN_GEMINI_API_KEY` e `TN_TTS_API_KEY`.
 
 == Changelog ==
+
+= 1.1.1 =
+* CSS do admin e do player reescritos com escala tipográfica e de espaçamento consistente (fim dos textos ora grandes demais, ora pequenos demais).
+* Cards do painel redesenhados: ícone circular colorido por status, hierarquia clara entre número e rótulo, hover com elevação, modificador "info" que faltava (cards "Pendentes" e "Tempo total de áudio" agora têm cor própria).
+* Tabelas: cabeçalhos de coluna diferenciados dos rótulos de linha (a tabela de Diagnóstico não fica mais toda em maiúsculas).
 
 = 1.1.0 =
 * Voz do navegador: escolha automática da melhor voz (neural/natural, timbre feminino suave por padrão, configurável), texto preparado para a fala (datas, siglas, abreviações, números, romanos, moeda) e frases enviadas em trechos curtos — sem cortes nem sílabas perdidas no Chrome; player compatível com Safari antigo; clique na frase do texto para ouvir dali.

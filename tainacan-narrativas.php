@@ -3,7 +3,7 @@
  * Plugin Name:       Tainacan Narrativas
  * Plugin URI:        https://github.com/marcossigismundo/tainacan-narrativas
  * Description:       Transforma itens Tainacan em experiências narrativas em áudio: leitura documental dos metadados e documentos, narrativa opcional assistida por IA e síntese de voz, com player acessível na página pública do item.
- * Version:           1.1.0
+ * Version:           1.1.1
  * Requires at least: 6.5
  * Requires PHP:      8.0
  * Requires Plugins:  tainacan
@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'TN_VERSION', '1.1.0' );
+define( 'TN_VERSION', '1.1.1' );
 define( 'TN_PLUGIN_FILE', __FILE__ );
 define( 'TN_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'TN_PLUGIN_URL', plugin_dir_url( __FILE__ ) );

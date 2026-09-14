@@ -2,6 +2,15 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/); versionamento semântico.
 
+## [1.1.1] — 2026-09-14
+
+### Alterado
+- `assets/css/admin.css` reescrito com tokens de escala tipográfica (`--tn-fs-2xs` … `--tn-fs-3xl`) e de espaçamento (`--tn-sp-1` … `--tn-sp-6`); todo texto do admin passou a resolver para um desses passos em vez de valores px/rem ad hoc (fonte de tamanhos inconsistentes reportada pelo usuário).
+- Cards do dashboard (`tn-card`) redesenhados: ícone circular tintado por modificador (`ok`/`warn`/`danger`/`info`/`muted`, cada um com glifo próprio via `::before`), corpo com hierarquia número/rótulo mais clara, hover com elevação e sombra; adicionado o modificador `--info` que faltava no CSS (cards "Pendentes" e "Tempo total de áudio" usavam a classe sem estilo correspondente). `tab-dashboard.php` ganhou o wrapper `tn-card__icon`/`tn-card__body` (cartão vira `<span>` em vez de `<a>` quando não há link, em vez de link vazio).
+- `.tn-table th` dividido em `thead th` (cabeçalho de coluna, uppercase discreto) e `tbody th[scope="row"]` (rótulo de linha, peso semibold, caixa normal) — a tabela de Diagnóstico não fica mais inteira em maiúsculas.
+- `assets/css/player.css`: mesmos tokens de escala (relativos a `em`, herdando o tamanho do tema hospedeiro) aplicados a título, meta, badge, transcript, tempo e nota de proveniência.
+- Validado renderizando as 9 abas do admin via WP-CLI + Chrome headless (screenshots) e reconferindo phpcs/phpunit.
+
 ## [1.1.0] — 2026-09-14
 
 ### Adicionado
